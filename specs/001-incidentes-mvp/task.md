@@ -11,7 +11,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 ## Bloque 0 — Cimientos
 
-- [ ] **T-01 · Arrancar el backend con el esquema creado** — RF-2, RF-3, RF-13
+- [x] **T-01 · Arrancar el backend con el esquema creado** — RF-2, RF-3, RF-13
   **Hecho cuando:** `./mvnw spring-boot:run` arranca sin errores contra la base local y en pgAdmin existen las tablas `users`, `incidents`, `incident_events` e `incident_embeddings`, con la extensión `vector` habilitada.
 
 - [ ] **T-02 · Precargar supervisores y técnicos de ejemplo** — RF-1, RF-2
