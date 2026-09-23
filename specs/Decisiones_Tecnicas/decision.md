@@ -7,7 +7,7 @@
 - El supervisor crea un incidente 
 - El supervisor se encarga de **asignar un técnico a un incidente** 
 - El supervisor tendra acceso a la **lista global de incidentes** podrá **Editar y visualizar**    incidente.
-- El supervisor si puede **cambiar el técnico asignado a un incidente** . Si el incidente esta en **estado registrado o en progreso** se puede cambiar el técnico , pero si no es el caso . El sistema bloquea cualquier intento de reasignación  y el sistema muestra una lista de técnicos que se pueden reasignar , pero tiene que petenecer al mismo área. 
+- El supervisor si puede **cambiar el técnico asignado a un incidente** . Si el incidente esta en **estado asignado o en progreso** se puede cambiar el técnico , pero si no es el caso . El sistema bloquea cualquier intento de reasignación  y el sistema muestra una lista de técnicos que se pueden reasignar , pero tiene que petenecer al mismo área. 
 
 - El supervisor no puede cambiar el estado del incidente **El sistema lo hace**. Ejemplo de estados 
 progreso, resuelto, etc . 
