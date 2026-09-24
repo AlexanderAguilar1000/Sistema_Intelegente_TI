@@ -1,0 +1,15 @@
+<div class="team-row">
+  <app-user-avatar [name]="user().fullName" [large]="true" />
+  <div class="info">
+    <p class="name">{{ user().fullName }}</p>
+    <p class="meta">{{ email() }} · {{ user().area }}</p>
+  </div>
+  <span class="badge-tech">Técnico</span>
+  <!-- Sin acción por ahora: la edición no está definida en el mockup -->
+  <button type="button" class="icon-btn" [attr.aria-label]="'Editar ' + user().fullName">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  </button>
+</div>

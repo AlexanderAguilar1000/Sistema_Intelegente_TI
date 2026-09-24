@@ -1,0 +1,40 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title" (click)="$event.stopPropagation()">
+      <h2 id="dlg-title">Dar de alta técnico</h2>
+      <p class="desc">Registra un técnico para que pueda recibir incidentes de su área.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="form-stack">
+        <label>
+          <span>Nombre completo <b class="required">*</b></span>
+          <input type="text" formControlName="fullName" placeholder="Ej.: Laura Martínez" />
+        </label>
+
+        <label>
+          <span>Usuario corporativo <b class="required">*</b></span>
+          <input type="text" formControlName="username" placeholder="laura.martinez" />
+          @if (showUsernameError()) {
+            <small class="error">
+              {{ form.controls.username.hasError('taken') ? 'Ese usuario ya existe.' : 'Usa el formato nombre.apellido en minúsculas.' }}
+            </small>
+          }
+        </label>
+
+        <label>
+          <span>Área técnica <b class="required">*</b></span>
+          <select formControlName="area">
+            <option value="" disabled>Selecciona un área</option>
+            @for (a of areas; track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="footer">
+          <button type="button" class="btn btn-outline" (click)="close()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Crear técnico</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
