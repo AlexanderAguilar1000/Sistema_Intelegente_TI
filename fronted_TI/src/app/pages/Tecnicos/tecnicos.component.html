@@ -1,0 +1,32 @@
+<div class="page-wrap">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Administración</p>
+      <h1>Equipo técnico</h1>
+      <p class="subtitle">Gestiona los técnicos disponibles para asignar incidentes.</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="createOpen.set(true)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Dar de alta técnico
+    </button>
+  </header>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>Técnicos registrados</h2>
+      <span class="count">{{ technicians().length }}</span>
+    </div>
+
+    @if (technicians().length) {
+      @for (t of technicians(); track t.id) {
+        <app-team-row [user]="t" />
+      }
+    } @else {
+      <app-empty-state message="Aún no hay técnicos registrados" />
+    }
+  </section>
+</div>
+
+<app-user-create-dialog [open]="createOpen()" (closed)="createOpen.set(false)" (created)="onCreated($event)" />

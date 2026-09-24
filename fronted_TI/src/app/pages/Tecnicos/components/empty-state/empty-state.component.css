@@ -1,0 +1,12 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  color: #637083;
+  font-size: 13px;
+}
+.empty-state svg { width: 28px; color: #99a8ba; }
+p { margin: 0; }
