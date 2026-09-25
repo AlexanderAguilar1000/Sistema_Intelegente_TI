@@ -1,1 +1,9 @@
-<router-outlet />
+<div class="app-shell">
+  <app-sidebar [currentUser]="currentUser" />
+  <div class="main-shell">
+    <app-topbar [currentUser]="currentUser" />
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+</div>

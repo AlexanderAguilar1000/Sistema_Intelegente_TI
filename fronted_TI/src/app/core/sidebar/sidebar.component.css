@@ -1,0 +1,99 @@
+:host {
+  display: block;
+  flex: none;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+p { margin: 0; }
+
+.app-sidebar {
+  width: 238px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-right: 1px solid #e3e8ef;
+  box-sizing: border-box;
+}
+
+.sidebar-logo {
+  height: 72px;
+  flex: none;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #e3e8ef;
+}
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #1976f3, #1252ba);
+  box-shadow: 0 4px 10px #0d64d733;
+}
+.brand-mark svg { width: 18px; height: 18px; }
+.brand-title { font-size: 14px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: #1d2733; }
+.brand-sub { margin-top: 2px; font-size: 10px; color: #637083; }
+
+.sidebar-nav { flex: 1; padding: 22px 12px 0; overflow-y: auto; }
+.nav-section {
+  padding: 0 12px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a96a7;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.nav-item {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  margin-bottom: 3px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5a6675;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.nav-item svg { width: 16px; height: 16px; flex: none; }
+.nav-item:hover { background: #f3f7fd; color: #1d65d7; }
+.nav-item.active { color: #1d65d7; background: #eaf2ff; font-weight: 600; }
+
+.sidebar-footer { margin-top: auto; padding: 14px 12px 12px; border-top: 1px solid #e3e8ef; }
+.user-box { display: flex; align-items: center; gap: 10px; padding: 0 4px 10px; }
+.avatar {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e0edff;
+  color: #1b61cf;
+  border: 1px solid #c6dcfd;
+  font-size: 11px;
+  font-weight: 700;
+}
+.user-info { min-width: 0; }
+.user-name { font-size: 12px; font-weight: 600; color: #1d2733; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-role { margin-top: 1px; font-size: 11px; color: #637083; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logout { margin-bottom: 0; }
+
+@media (max-width: 760px) {
+  :host { display: none; }
+}

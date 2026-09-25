@@ -1,0 +1,91 @@
+:host { display: block; }
+
+.topbar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 30px;
+  box-sizing: border-box;
+  background: #fff;
+  border-bottom: 1px solid #e3e8ef;
+}
+
+.topbar-context { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.crumb { color: #1d2733; }
+.crumb.current { color: #637083; }
+.crumb-sep { width: 15px; height: 15px; color: #8a96a7; }
+
+.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+button { font: inherit; cursor: pointer; }
+.icon-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #637083;
+  transition: background .15s ease;
+}
+.icon-button:hover { background: #f3f7fd; color: #1d65d7; }
+.icon-button svg { width: 18px; height: 18px; }
+.notification-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f04444;
+  border: 1px solid #fff;
+}
+
+.mobile-menu { display: none; margin-right: 12px; }
+.mobile-menu svg { width: 19px; height: 19px; }
+
+.separator { width: 1px; height: 26px; margin: 0 8px; background: #e3e8ef; }
+
+.user-switcher {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  transition: background .15s ease;
+}
+.user-switcher:hover { background: #f3f7fd; }
+.avatar {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e0edff;
+  color: #1b61cf;
+  border: 1px solid #c6dcfd;
+  font-size: 11px;
+  font-weight: 700;
+}
+.user-text { display: flex; flex-direction: column; line-height: 1.25; }
+.user-name { font-size: 13px; font-weight: 600; color: #1d2733; }
+.user-role { font-size: 11px; color: #637083; }
+.chevron { width: 15px; height: 15px; color: #8a96a7; }
+
+@media (max-width: 1100px) { .topbar { padding: 0 22px; } }
+@media (max-width: 760px) {
+  .topbar { height: 62px; padding: 0 16px; justify-content: flex-start; }
+  .mobile-menu { display: grid; }
+  .topbar-context { font-size: 12px; }
+  .crumb.current, .crumb-sep { display: none; }
+}
+@media (max-width: 640px) {
+  .user-text { display: none; }
+}
