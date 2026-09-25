@@ -1,0 +1,47 @@
+<header class="topbar">
+  <button type="button" class="icon-button mobile-menu" aria-label="Abrir menú" (click)="menuClick.emit()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 12h16M4 6h16M4 18h16" />
+    </svg>
+  </button>
+
+  <nav class="topbar-context" aria-label="Migas de pan">
+    <span class="crumb">{{ section() }}</span>
+    <svg class="crumb-sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+    <span class="crumb current">Centro de operaciones</span>
+  </nav>
+
+  <div class="topbar-actions">
+    <button type="button" class="icon-button" aria-label="Notificaciones">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </svg>
+      @if (hasNotifications()) {
+        <span class="notification-dot"></span>
+      }
+    </button>
+
+    <button type="button" class="icon-button" aria-label="Ayuda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+      </svg>
+    </button>
+
+    <span class="separator"></span>
+
+    <button type="button" class="user-switcher" aria-label="Cambiar de usuario" (click)="chooseUser.emit()">
+      <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+      <span class="user-text">
+        <span class="user-name">{{ currentUser().fullName }}</span>
+        <span class="user-role">{{ currentUser().role }}</span>
+      </span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </button>
+  </div>
+</header>
