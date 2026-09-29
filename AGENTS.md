@@ -22,6 +22,11 @@ Sistema de gestión y resolución de incidentes de TI que permite registrar, cla
 - Identificadores de código (clases, variables, funciones) en inglés. Comentarios, mensajes de commit y documentación en español.
 - Los embeddings y búsquedas semánticas se manejan solo en el servicio Python contra pgvector; el backend Spring Boot no accede directamente a los vectores.
 
+## Estructura del proyecto 
+- `SistemaInteligenteTI/` --> Backend Spring Boot 
+- `SistemaInteligenteTI/src/main/java/com/corporativoTI/SistemaInteligenteTI/` --> Código backend 
+-  `SistemaInteligenteTI/src/test/java/com/corporativoTI/SistemaInteligenteTI/` -->pruebas automatizadas 
+
 ## Reglas
 - Lee docs/constitution.md y la spec activa antes de tocar código.
 - No modificar el esquema de PostgreSQL/pgvector (tablas, dimensiones de embeddings, índices) sin crear la migración correspondiente.
@@ -35,4 +40,6 @@ Sistema de gestión y resolución de incidentes de TI que permite registrar, cla
 - No exponer claves de API (Groq, credenciales de base de datos, etc.) en código ni en commits; usar siempre variables de entorno.
 - No cambiar el proveedor del LLM (Groq) ni el motor de búsqueda semántica (pgvector) sin discutirlo primero con el usuario.
 
-
+## Al terminar cualquier tarea
+- Ejecutar los tests de ambos servicios (`./mvnw test` y `pytest`) y verificar que todos pasen.
+- Verificar que el lint/formato quede limpio en backend y servicio de IA antes de dar la tarea por finalizada.

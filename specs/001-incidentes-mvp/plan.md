@@ -27,12 +27,14 @@ Solo presentación: ningún cálculo de estado ni regla de negocio; habilita o d
 - `shared/` — catálogos recibidos del backend (RF-5), componentes de estado y prioridad.
 
 ### 1.2 Backend Spring Boot (`backend/`) — dueño de las reglas de negocio
-Capas por módulo: `web` (controlador + DTO) → `service` (reglas) → `domain` (entidades, enums, máquina de estados) → `repository`.
+Capas por módulo: `controller` (entrada/salida REST) → `dto` (contratos de petición/respuesta) → `service` (reglas de negocio, casos de uso) → `model` (entidades, enums, máquina de estados) → `repository` (persistencia). No todos los módulos usan las cinco capas: un módulo sin persistencia ni reglas propias (p. ej. `catalog`) solo tiene `model`, `controller` y `dto` (decisión D14).
 - `users` — lista de usuarios para el selector, resolución del usuario activo a partir de la cabecera `X-User-Id`, comprobación de rol antes de cada caso de uso, alta de técnicos con área obligatoria y consulta de técnicos por área (RF-1, RF-2, RF-7). Sin framework de seguridad: es una comprobación de dominio, no autenticación.
-- `catalog` — enums de tipo, prioridad y área; fuente de verdad de los catálogos (RF-5).
-- `incidents.domain` — entidad `Incident`, `IncidentStateMachine` con las transiciones de la sección 4, reglas de pertenencia de área, longitud mínima de solución (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14).
+- `catalog` — enums de tipo, prioridad y área en `model`; controlador y DTO de `GET /api/catalogs` en `controller`/`dto`; fuente de verdad de los catálogos (RF-5).
+- `incidents.model` — entidad `Incident`, `IncidentStateMachine` con las transiciones de la sección 4, reglas de pertenencia de área, longitud mínima de solución (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14).
 - `incidents.service` — casos de uso: registrar, reclasificar, corregir, asignar, listar, iniciar, analizar, resolver, cerrar, reindexar (RF-3, RF-4, RF-6…RF-14).
-- `incidents.web` — controladores REST (sección 3.1).
+- `incidents.controller` — controladores REST (sección 3.1).
+- `incidents.dto` — contratos de petición y respuesta de esos controladores (sección 3.1).
+- `incidents.repository` — persistencia de `Incident` e `IncidentEvent` sobre PostgreSQL.
 - `ai` — cliente HTTP del servicio Python con sus tiempos límite; traduce fallos a un resultado de dominio, nunca lanza al controlador (RF-4, RF-11, RF-13, RNF-1, RNF-2, RNF-8).
 - `audit` — registro de eventos de cada acción (RNF-6).
 - `shared` — errores de negocio, respuesta de error homogénea, configuración.
@@ -177,6 +179,7 @@ Toda transición pasa por `IncidentStateMachine`; los controladores no deciden (
 | D11 | Fallos de IA traducidos a **resultados de dominio**, nunca a excepciones que suban al controlador (RNF-8) | Garantiza que un incidente o una solución nunca se pierdan por un fallo externo | Propagar la excepción: convertiría un fallo de Groq en un error 500 y en pérdida de datos del formulario |
 | D12 | Tests de integración contra la **instalación local de PostgreSQL+pgvector**, en una base de datos separada de la de desarrollo (por ejemplo `ti_incidentes_test`), con la conexión por variables de entorno y limpieza de datos en cada prueba (principio 4) | Es el único modo de probar de verdad las restricciones, las migraciones y la búsqueda vectorial, y no añade ninguna dependencia nueva al entorno del desarrollador | Base en memoria H2: no soporta pgvector ni los tipos usados. Docker o Testcontainers: descartados porque el MVP no debe depender de contenedores, y Testcontainers sería además una librería nueva |
 | D13 | El servicio Python **no llama nunca** al backend (sección 3.2) | Evita dependencia circular y deja un solo sentido de comunicación, más fácil de simular en tests | Devolución asíncrona de la clasificación desde Python hacia Spring Boot, como se planteó en la idea inicial: obliga a exponer un endpoint de retorno y a gestionar reintentos |
+| D14 | Paquetes del backend Spring Boot organizados por módulo con capas **`controller` / `dto` / `service` / `model` / `repository`** (sección 1.2), en vez de las capas `web` (controlador+DTO) y `domain` (entidades+enums) que fijaba la versión anterior de este plan | Decisión explícita del usuario tras revisar la implementación de T-03: separa controlador y DTO en paquetes propios y nombra en inglés la capa de entidades (`model`) y la de persistencia (`repository`), siguiendo la convención habitual de Spring Boot | Capas `web`/`domain` de la versión anterior de este plan: agrupaban controlador y DTO en un mismo paquete y usaban `domain` para entidades y máquina de estados; se descartan por decisión explícita del usuario, no por un defecto técnico |
 
 ## 6. Estrategia de test
 
@@ -210,15 +213,15 @@ Regla de cierre: ninguna tarea se da por terminada con `./mvnw test` o `pytest` 
 | RF-3 Registro síncrono | `incidents.service`, `ai` | `POST /api/incidents` → `/ai/v1/classifications` | Backend 1, 2, 5 |
 | RF-4 Clasificación con IA | `ai`, `domain/classification.py` | `/ai/v1/classifications` | Backend 2, 5; IA 1 |
 | RF-5 Catálogos | `catalog`, `shared/` | `GET /api/catalogs` | Backend 1; IA 1 |
-| RF-6 Corrección manual | `incidents.domain`, `incidents/classification/` | `PATCH .../classification` | Backend 1, 4 |
-| RF-7 Asignación y reasignación | `incidents.domain`, `users`, `incidents/assignment/` | `PUT .../assignment`, `GET /api/technicians?area=` | Backend 1, 3, 4 |
+| RF-6 Corrección manual | `incidents.model`, `incidents/classification/` | `PATCH .../classification` | Backend 1, 4 |
+| RF-7 Asignación y reasignación | `incidents.model`, `users`, `incidents/assignment/` | `PUT .../assignment`, `GET /api/technicians?area=` | Backend 1, 3, 4 |
 | RF-8 Listado y filtrado | `incidents.service`, `incidents/list/` | `GET /api/incidents` | Backend 4; Angular |
-| RF-9 Detalle | `incidents.web`, `incidents/detail/` | `GET /api/incidents/{id}` | Backend 3; Angular |
-| RF-10 Inicio del trabajo | `incidents.domain` | `POST .../start` | Backend 1 |
+| RF-9 Detalle | `incidents.controller`, `incidents/detail/` | `GET /api/incidents/{id}` | Backend 3; Angular |
+| RF-10 Inicio del trabajo | `incidents.model` | `POST .../start` | Backend 1 |
 | RF-11 Analizar con IA | `ai`, `domain/retrieval.py`, `domain/recommendation.py` | `/ai/v1/analyses` | Backend 2, 3, 5; IA 2, 4, 5 |
-| RF-12 Resolución | `incidents.domain` | `POST .../resolution` | Backend 1, 4 |
+| RF-12 Resolución | `incidents.model` | `POST .../resolution` | Backend 1, 4 |
 | RF-13 Histórico e indexación | `ai`, `infrastructure/vector_store.py` | `/ai/v1/embeddings`, `POST .../index/retry` | Backend 2, 5; IA 4, 5 |
-| RF-14 Cierre sin solución | `incidents.domain` | `POST .../closure` | Backend 1, 4 |
+| RF-14 Cierre sin solución | `incidents.model` | `POST .../closure` | Backend 1, 4 |
 
 ## 8. Orden de implementación sugerido
 1. Migraciones y modelo de datos (RF-2, RF-3, RF-13) · 2. Usuarios, selector de usuario activo y reglas de rol (RF-1) · 3. Alta de técnicos y catálogos (RF-2, RF-5) · 4. Registro con IA simulada y máquina de estados (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14) · 5. Servicio Python de clasificación (RF-4) · 6. Indexación y recuperación (RF-13, RF-11) · 7. Frontend Angular (RF-8, RF-9 y el resto de pantallas) · 8. Demostración de punta a punta.

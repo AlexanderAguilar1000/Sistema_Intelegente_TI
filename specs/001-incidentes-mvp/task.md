@@ -17,7 +17,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [ ] **T-02 · Precargar supervisores y técnicos de ejemplo** — RF-1, RF-2
   **Hecho cuando:** al arrancar de cero, la tabla `users` contiene al menos dos supervisores y cuatro técnicos repartidos en áreas distintas, y volver a arrancar no los duplica.
 
-- [ ] **T-03 · Publicar los catálogos de tipo, prioridad y área** — RF-5
+- [x] **T-03 · Publicar los catálogos de tipo, prioridad y área** — RF-5
   **Hecho cuando:** `GET /api/catalogs` devuelve las tres listas con exactamente los valores de RF-5, y un test falla si alguien añade o quita un valor.
 
 - [ ] **T-04 · Mostrar la lista de usuarios para el selector** — RF-1
