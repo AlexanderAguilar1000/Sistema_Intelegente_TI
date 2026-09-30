@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * RF-5: {@code GET /api/catalogs} debe devolver exactamente los valores del
  * catálogo cerrado de tipo, prioridad y área.
  */
+//Se espera que tengas estos valores cuando llamen al enppoint 
 @WebMvcTest(CatalogController.class)
 class CatalogControllerTest {
 

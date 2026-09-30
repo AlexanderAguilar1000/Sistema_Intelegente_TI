@@ -33,7 +33,10 @@ class CatalogEnumsTest {
                         "INFRASTRUCTURE", "APPLICATIONS", "DATABASE", "SECURITY", "USER_SUPPORT");
     }
 
-    @Test
+    @Test//esta realizando pruebas esta opteniendo el valor de la constante de cada enum y comparando si son iguales a estos 
+    //Revisa Area.java mira el valor que tiene las constantes  y estan comparando ese valor con una palara norma 
+    //en este caso bug si son iguales los valores esta correcto , sino esta incorrrecto . 
+    //revisa los numb 
     void incidentTypeLabelsAreInSpanish() {
         assertThat(IncidentType.BUG.getLabel()).isEqualTo("Bug");
         assertThat(IncidentType.PERFORMANCE.getLabel()).isEqualTo("Rendimiento");
@@ -43,7 +46,7 @@ class CatalogEnumsTest {
         assertThat(IncidentType.CONFIGURATION.getLabel()).isEqualTo("Configuración");
     }
 
-    @Test
+    @Test //
     void priorityLabelsAreInSpanish() {
         assertThat(Priority.HIGH.getLabel()).isEqualTo("Alta");
         assertThat(Priority.MEDIUM.getLabel()).isEqualTo("Media");
