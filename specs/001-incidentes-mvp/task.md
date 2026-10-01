@@ -20,12 +20,12 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-03 · Publicar los catálogos de tipo, prioridad y área** — RF-5
   **Hecho cuando:** `GET /api/catalogs` devuelve las tres listas con exactamente los valores de RF-5, y un test falla si alguien añade o quita un valor.
 
-- [ ] **T-04 · Mostrar la lista de usuarios para el selector** — RF-1
+- [x] **T-04 · Mostrar la lista de usuarios para el selector** — RF-1
   **Hecho cuando:** `GET /api/users` devuelve nombre, rol y área de cada usuario precargado, con un test que lo comprueba.
 
 ## Bloque 1 — Usuario activo y técnicos
 
-- [ ] **T-05 · Identificar al usuario activo en cada petición** — RF-1
+- [x] **T-05 · Identificar al usuario activo en cada petición** — RF-1
   **Hecho cuando:** una petición a incidentes sin cabecera `X-User-Id` devuelve 400, con un id inexistente también 400, y con un id válido la petición se atribuye a ese usuario; tests de los tres casos.
 
 - [ ] **T-06 · Denegar acciones que no corresponden al rol** — RF-1
