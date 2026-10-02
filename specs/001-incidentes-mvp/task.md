@@ -31,7 +31,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [ ] **T-06 · Denegar acciones que no corresponden al rol** — RF-1
   **Hecho cuando:** un técnico que llama a una acción de supervisor recibe 403 con mensaje en español, y un test cubre al menos dos endpoints de supervisor.
 
-- [ ] **T-07 · Dar de alta un técnico con su área** — RF-2
+- [x] **T-07 · Dar de alta un técnico con su área** — RF-2
   **Hecho cuando:** `POST /api/technicians` crea el técnico con rol y área; usuario repetido, área fuera de catálogo o campo faltante devuelven error indicando la causa; tests de los cuatro casos.
 
 - [ ] **T-08 · Mostrar la lista de técnicos de un área** — RF-7

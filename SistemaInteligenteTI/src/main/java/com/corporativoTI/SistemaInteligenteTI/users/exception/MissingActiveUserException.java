@@ -1,4 +1,4 @@
-package com.corporativoTI.SistemaInteligenteTI.users.service;
+package com.corporativoTI.SistemaInteligenteTI.users.exception;
 
 /** La petición no trae la cabecera {@code X-User-Id} del usuario activo (RF-1). */
 public class MissingActiveUserException extends RuntimeException {

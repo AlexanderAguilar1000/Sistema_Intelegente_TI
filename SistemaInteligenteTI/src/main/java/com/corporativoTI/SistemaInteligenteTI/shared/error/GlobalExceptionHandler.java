@@ -1,7 +1,10 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
-import com.corporativoTI.SistemaInteligenteTI.users.service.MissingActiveUserException;
-import com.corporativoTI.SistemaInteligenteTI.users.service.UnknownActiveUserException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.UnknownActiveUserException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.UsernameAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,5 +24,23 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnknownActiveUser(UnknownActiveUserException ex) {
         return new ErrorResponse("UNKNOWN_ACTIVE_USER", ex.getMessage());
+    }
+
+    @ExceptionHandler(MissingFieldException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleMissingField(MissingFieldException ex) {
+        return new ErrorResponse("MISSING_FIELD", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAreaException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleInvalidArea(InvalidAreaException ex) {
+        return new ErrorResponse("INVALID_AREA", ex.getMessage());
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
+        return new ErrorResponse("USERNAME_ALREADY_EXISTS", ex.getMessage());
     }
 }

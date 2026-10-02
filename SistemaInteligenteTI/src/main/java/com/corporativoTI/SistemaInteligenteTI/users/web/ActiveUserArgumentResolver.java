@@ -2,8 +2,8 @@ package com.corporativoTI.SistemaInteligenteTI.users.web;
 
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.repository.UserRepository;
-import com.corporativoTI.SistemaInteligenteTI.users.service.MissingActiveUserException;
-import com.corporativoTI.SistemaInteligenteTI.users.service.UnknownActiveUserException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.UnknownActiveUserException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
