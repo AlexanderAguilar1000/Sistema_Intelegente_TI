@@ -34,7 +34,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-07 · Dar de alta un técnico con su área** — RF-2
   **Hecho cuando:** `POST /api/technicians` crea el técnico con rol y área; usuario repetido, área fuera de catálogo o campo faltante devuelven error indicando la causa; tests de los cuatro casos.
 
-- [ ] **T-08 · Mostrar la lista de técnicos de un área** — RF-7
+- [x] **T-08 · Mostrar la lista de técnicos de un área** — RF-7
   **Hecho cuando:** `GET /api/technicians?area=APPLICATIONS` devuelve solo los técnicos de esa área y ninguno de otra, comprobado con técnicos sembrados en dos áreas distintas.
 
 ## Bloque 2 — Incidentes sin IA

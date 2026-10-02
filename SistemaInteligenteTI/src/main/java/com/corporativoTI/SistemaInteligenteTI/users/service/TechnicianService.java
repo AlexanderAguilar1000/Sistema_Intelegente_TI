@@ -9,6 +9,7 @@ import com.corporativoTI.SistemaInteligenteTI.users.dto.UserResponse;
 import com.corporativoTI.SistemaInteligenteTI.users.model.Role;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.repository.UserRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 /** Casos de uso sobre técnicos: darlos de alta con su área (RF-2). */
@@ -48,6 +49,15 @@ public class TechnicianService {
     //en el propio service esta la logica de negocio y las validaciones
     //cuando detexte un error llama a la clase que lo quehace es invocar el error , ese error
     //es pasado al endpoind y eso le da al fronted para que lo muestre
+    /** Técnicos de un área, para ofrecer solo ellos al asignar un incidente (RF-7). */
+    public List<UserResponse> listTechniciansByArea(String areaText) {
+        Area area = parseArea(requireText(areaText, "area"));
+        return userRepository.findByRoleAndAreaOrderByFullName(Role.TECHNICIAN, area).stream()
+                .map(user -> new UserResponse(
+                        user.getId(), user.getFullName(), user.getRole().name(), user.getArea().name()))
+                .toList();
+    }
+
     private static String requireText(String value, String field) {
         if (value == null || value.isBlank()) {
             throw new MissingFieldException(field);

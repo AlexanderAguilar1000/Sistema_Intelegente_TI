@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final ActiveUserArgumentResolver activeUserArgumentResolver;
 
-    @Override
+    @Override//este es el resolver que debe participar cuando tengas que resolver parametros 
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(activeUserArgumentResolver);
     }
