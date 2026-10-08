@@ -28,7 +28,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-05 · Identificar al usuario activo en cada petición** — RF-1
   **Hecho cuando:** una petición a incidentes sin cabecera `X-User-Id` devuelve 400, con un id inexistente también 400, y con un id válido la petición se atribuye a ese usuario; tests de los tres casos.
 
-- [ ] **T-06 · Denegar acciones que no corresponden al rol** — RF-1
+- [x] **T-06 · Denegar acciones que no corresponden al rol** — RF-1
   **Hecho cuando:** un técnico que llama a una acción de supervisor recibe 403 con mensaje en español, y un test cubre al menos dos endpoints de supervisor.
 
 - [x] **T-07 · Dar de alta un técnico con su área** — RF-2

@@ -3,6 +3,7 @@ package com.corporativoTI.SistemaInteligenteTI.shared.error;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.RoleNotAllowedException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UnknownActiveUserException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UsernameAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnknownActiveUser(UnknownActiveUserException ex) {
         return new ErrorResponse("UNKNOWN_ACTIVE_USER", ex.getMessage());
+    }
+
+    @ExceptionHandler(RoleNotAllowedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleRoleNotAllowed(RoleNotAllowedException ex) {
+        return new ErrorResponse("FORBIDDEN_ROLE", ex.getMessage());
     }
 
     @ExceptionHandler(MissingFieldException.class)

@@ -17,12 +17,16 @@ import org.springframework.stereotype.Service;
 public class TechnicianService {
 
     private final UserRepository userRepository;
+    private final RoleGuard roleGuard;
 
-    public TechnicianService(UserRepository userRepository) {
+    public TechnicianService(UserRepository userRepository, RoleGuard roleGuard) {
         this.userRepository = userRepository;
+        this.roleGuard = roleGuard;
     }
 
-    public UserResponse createTechnician(CreateTechnicianRequest request) {
+    /** Solo un supervisor puede dar de alta técnicos (RF-1, RF-2). */
+    public UserResponse createTechnician(User activeUser, CreateTechnicianRequest request) {
+        roleGuard.requireSupervisor(activeUser);//verifica si es el supervisor el que esta modificando
         String fullName = requireText(request.fullName(), "fullName");
         String username = requireText(request.username(), "username");
         String areaText = requireText(request.area(), "area");
@@ -50,7 +54,8 @@ public class TechnicianService {
     //cuando detexte un error llama a la clase que lo quehace es invocar el error , ese error
     //es pasado al endpoind y eso le da al fronted para que lo muestre
     /** Técnicos de un área, para ofrecer solo ellos al asignar un incidente (RF-7). */
-    public List<UserResponse> listTechniciansByArea(String areaText) {
+    public List<UserResponse> listTechniciansByArea(User activeUser, String areaText) {
+        roleGuard.requireSupervisor(activeUser);
         Area area = parseArea(requireText(areaText, "area"));
         return userRepository.findByRoleAndAreaOrderByFullName(Role.TECHNICIAN, area).stream()
                 .map(user -> new UserResponse(

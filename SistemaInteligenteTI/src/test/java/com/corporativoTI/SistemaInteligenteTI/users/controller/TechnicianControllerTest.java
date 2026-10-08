@@ -32,9 +32,17 @@ class TechnicianControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
 
+    /** Las acciones sobre técnicos son de supervisor (T-06): se actúa como el supervisor precargado. */
+    private String supervisorId() {
+        return String.valueOf(userRepository.findByUsername("laura.supervisora").orElseThrow().getId());
+    }
+
     private ResultActions postTechnician(String json) throws Exception {
         return mockMvc.perform(
-                post("/api/technicians").contentType(MediaType.APPLICATION_JSON).content(json));
+                post("/api/technicians")
+                        .header("X-User-Id", supervisorId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json));
     }
 
     @Test
@@ -130,7 +138,7 @@ class TechnicianControllerTest {
         saveUser("db.uno.t08", Role.TECHNICIAN, Area.DATABASE);
         saveUser("super.t08", Role.SUPERVISOR, null);
 
-        mockMvc.perform(get("/api/technicians").param("area", "APPLICATIONS"))
+        mockMvc.perform(get("/api/technicians").header("X-User-Id", supervisorId()).param("area", "APPLICATIONS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.fullName == 'Nombre apps.uno.t08')]").isNotEmpty())
                 .andExpect(jsonPath("$[?(@.fullName == 'Nombre apps.dos.t08')]").isNotEmpty())
@@ -139,7 +147,7 @@ class TechnicianControllerTest {
                 .andExpect(jsonPath("$[?(@.area != 'APPLICATIONS')]").isEmpty())
                 .andExpect(jsonPath("$[?(@.role != 'TECHNICIAN')]").isEmpty());
 
-        mockMvc.perform(get("/api/technicians").param("area", "DATABASE"))
+        mockMvc.perform(get("/api/technicians").header("X-User-Id", supervisorId()).param("area", "DATABASE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.fullName == 'Nombre db.uno.t08')]").isNotEmpty())
                 .andExpect(jsonPath("$[?(@.fullName == 'Nombre apps.uno.t08')]").isEmpty());
@@ -152,7 +160,7 @@ class TechnicianControllerTest {
                 .count();
         saveUser("apps.solo.t08", Role.TECHNICIAN, Area.APPLICATIONS);
 
-        mockMvc.perform(get("/api/technicians").param("area", "SECURITY"))
+        mockMvc.perform(get("/api/technicians").header("X-User-Id", supervisorId()).param("area", "SECURITY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value((int) inSecurity))
                 .andExpect(jsonPath("$[?(@.fullName == 'Nombre apps.solo.t08')]").isEmpty());
@@ -160,7 +168,7 @@ class TechnicianControllerTest {
 
     @Test
     void rejectsListingWithAreaOutsideTheCatalog() throws Exception {
-        mockMvc.perform(get("/api/technicians").param("area", "COCINA"))
+        mockMvc.perform(get("/api/technicians").header("X-User-Id", supervisorId()).param("area", "COCINA"))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.errorCode").value("INVALID_AREA"))
                 .andExpect(jsonPath("$.message").value(containsString("COCINA")));
@@ -168,7 +176,7 @@ class TechnicianControllerTest {
 
     @Test
     void rejectsListingWithoutArea() throws Exception {
-        mockMvc.perform(get("/api/technicians"))
+        mockMvc.perform(get("/api/technicians").header("X-User-Id", supervisorId()))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.errorCode").value("MISSING_FIELD"))
                 .andExpect(jsonPath("$.message").value(containsString("area")));

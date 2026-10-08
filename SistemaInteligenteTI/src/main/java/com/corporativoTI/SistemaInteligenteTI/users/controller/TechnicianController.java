@@ -2,7 +2,9 @@ package com.corporativoTI.SistemaInteligenteTI.users.controller;
 
 import com.corporativoTI.SistemaInteligenteTI.users.dto.CreateTechnicianRequest;
 import com.corporativoTI.SistemaInteligenteTI.users.dto.UserResponse;
+import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.service.TechnicianService;
+import com.corporativoTI.SistemaInteligenteTI.users.web.ActiveUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,13 +26,14 @@ public class TechnicianController {
 
     @GetMapping
     public List<UserResponse> listTechniciansByArea(
-            @RequestParam(name = "area", required = false) String area) {
-        return technicianService.listTechniciansByArea(area);
+            @ActiveUser User activeUser, @RequestParam(name = "area", required = false) String area) {
+        return technicianService.listTechniciansByArea(activeUser, area);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse createTechnician(@RequestBody CreateTechnicianRequest request) {
-        return technicianService.createTechnician(request);
+    public UserResponse createTechnician(
+            @ActiveUser User activeUser, @RequestBody CreateTechnicianRequest request) {
+        return technicianService.createTechnician(activeUser, request);
     }
 }
