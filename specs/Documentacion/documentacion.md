@@ -7,3 +7,5 @@
 
 - Además, ese "public ActiveUserArgumentResolver(@Lazy UserRepository userRepository) " el principal motivo por el que se puso @Lazy es porque , evito errores en las pruebas. 
 Si te das cuenta el CatalogController no tiene @ActiveUser entonces Spring ni debería preocuparse por ActiveUserArgumentResolver.""Pero spring al momento de correr las pruebas , crea el contexto  y lee ActiveUserArgumentResolver y entonces buca resolver el parametro UserRepository y como antes no tenia Lazy siempre se cargaba y al cargarse se conecta con userRepository para identificar el "id" del usuario"" . Entonces como no era @lazy el userRepository  , eso hacia que siempre buscara conectarse al JPA , entonces al correr las test del catalogo . Salia error , porque queria conectarse al JPA del catalogo , pero catalogo no tiene JPA y ahi daba error . Entonces "con ese lazy se soluciono".
+
+- Un supervisor no pertenece a ningún área
