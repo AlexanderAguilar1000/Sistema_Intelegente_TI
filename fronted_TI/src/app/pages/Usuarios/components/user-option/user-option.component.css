@@ -1,0 +1,29 @@
+:host { display: block; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e3e8ef;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.option:hover, .option.selected { border-color: #7baaf0; background: #f3f8ff; }
+.option:focus-visible { outline: 2px solid #9cc0f7; outline-offset: 1px; }
+.info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.name { font-size: 14px; font-weight: 600; color: #1d2733; }
+.meta { font-size: 12px; color: #637083; }
+.radio-dot {
+  flex: none;
+  box-sizing: border-box;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid #c3ccd9;
+  border-radius: 50%;
+  background: #fff;
+}
+.radio-dot.checked { border: 5px solid #2a77de; }

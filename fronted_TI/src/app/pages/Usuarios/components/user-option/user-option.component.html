@@ -1,0 +1,9 @@
+<button type="button" class="option" [class.selected]="selected()" role="radio" [attr.aria-checked]="selected()" (click)="select.emit()">
+  <app-user-avatar [name]="user().fullName" [large]="true" />
+  <span class="info">
+    <span class="name">{{ user().fullName }}</span>
+    <span class="meta">{{ subtitle() }}</span>
+  </span>
+  <app-role-badge [role]="user().role" />
+  <span class="radio-dot" [class.checked]="selected()" aria-hidden="true"></span>
+</button>

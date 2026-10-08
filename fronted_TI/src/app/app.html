@@ -1,9 +1,11 @@
 <div class="app-shell">
-  <app-sidebar [currentUser]="currentUser" />
+  <app-sidebar [currentUser]="currentUser()" />
   <div class="main-shell">
-    <app-topbar [currentUser]="currentUser" />
+    <app-topbar [currentUser]="currentUser()" (chooseUser)="selectorOpen.set(true)" />
     <main>
       <router-outlet />
     </main>
   </div>
 </div>
+
+<app-usuario [(open)]="selectorOpen" />

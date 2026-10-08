@@ -1,0 +1,34 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="selector-title" (click)="$event.stopPropagation()">
+      <header class="header">
+        <div>
+          <h2 id="selector-title">Seleccionar usuario activo</h2>
+          <p>Elige el usuario con el que deseas trabajar en esta sesión.</p>
+        </div>
+        <button type="button" class="close" aria-label="Cerrar" (click)="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="body" role="radiogroup" aria-label="Usuarios">
+        @if (loading()) {
+          <p class="state">Cargando usuarios...</p>
+        } @else if (error()) {
+          <p class="state error">{{ error() }}</p>
+        } @else {
+          @for (user of users(); track user.id) {
+            <app-user-option [user]="user" [selected]="user.id === selectedId()" (select)="selectedId.set(user.id)" />
+          }
+        }
+      </div>
+
+      <footer class="footer">
+        <span>Selecciona un usuario para continuar.</span>
+        <button type="button" class="btn-primary" [disabled]="selectedId() === null" (click)="confirm()">Continuar</button>
+      </footer>
+    </div>
+  </div>
+}

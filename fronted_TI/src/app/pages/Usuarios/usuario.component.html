@@ -1,0 +1,9 @@
+<app-user-selector-dialog
+  [open]="open()"
+  [users]="users()"
+  [activeUser]="activeUser()"
+  [loading]="loading()"
+  [error]="error()"
+  (confirmed)="onConfirmed($event)"
+  (closed)="open.set(false)"
+/>
