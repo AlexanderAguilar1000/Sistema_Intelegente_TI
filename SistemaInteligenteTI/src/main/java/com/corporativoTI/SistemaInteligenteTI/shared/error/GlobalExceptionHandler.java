@@ -1,5 +1,6 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
+import com.corporativoTI.SistemaInteligenteTI.incidents.model.InvalidTransitionException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
@@ -43,6 +44,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErrorResponse handleInvalidArea(InvalidAreaException ex) {
         return new ErrorResponse("INVALID_AREA", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTransitionException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleInvalidTransition(InvalidTransitionException ex) {
+        return new ErrorResponse("INVALID_TRANSITION", ex.getMessage());
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)

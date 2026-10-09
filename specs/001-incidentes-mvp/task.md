@@ -42,7 +42,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-09 · Registrar un incidente** — RF-3
   **Hecho cuando:** `POST /api/incidents` guarda el incidente en estado Registrado y pendiente de clasificación, con fecha y supervisor; título o descripción vacíos devuelven 422 indicando el campo; tests.
 
-- [ ] **T-10 · Fijar las transiciones válidas del incidente** — RF-3, RF-7, RF-10, RF-12, RF-14
+- [x] **T-10 · Fijar las transiciones válidas del incidente** — RF-3, RF-7, RF-10, RF-12, RF-14
   **Hecho cuando:** un test unitario recorre las transiciones de la sección 4 del plan, acepta todas las válidas y rechaza las inválidas (resolver sin iniciar, actuar sobre un cerrado, etc.).
 
 - [ ] **T-11 · Listar incidentes según quién mira** — RF-8

@@ -6,5 +6,10 @@ public enum IncidentStatus {
     ASSIGNED,
     IN_PROGRESS,
     RESOLVED,
-    CLOSED_WITHOUT_SOLUTION
+    CLOSED_WITHOUT_SOLUTION;
+
+    /** Resuelto y Cerrado sin solución son estados finales. */
+    public boolean isFinal() {
+        return this == RESOLVED || this == CLOSED_WITHOUT_SOLUTION;
+    }
 }
