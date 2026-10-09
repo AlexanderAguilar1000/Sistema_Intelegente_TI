@@ -39,7 +39,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 ## Bloque 2 — Incidentes sin IA
 
-- [ ] **T-09 · Registrar un incidente** — RF-3
+- [x] **T-09 · Registrar un incidente** — RF-3
   **Hecho cuando:** `POST /api/incidents` guarda el incidente en estado Registrado y pendiente de clasificación, con fecha y supervisor; título o descripción vacíos devuelven 422 indicando el campo; tests.
 
 - [ ] **T-10 · Fijar las transiciones válidas del incidente** — RF-3, RF-7, RF-10, RF-12, RF-14
