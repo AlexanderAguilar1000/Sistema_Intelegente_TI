@@ -2,13 +2,16 @@ package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.repository.IncidentRepository;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
+import com.corporativoTI.SistemaInteligenteTI.users.exception.RoleNotAllowedException;
 import com.corporativoTI.SistemaInteligenteTI.users.model.Role;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.service.RoleGuard;
@@ -19,7 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Casos de uso sobre incidentes: registro (RF-3) y listado según el usuario activo (RF-8). */
+/** Casos de uso sobre incidentes: registro (RF-3) y listado según el usuario activo (RF-8) y detalle (RF-9). */
 @Service
 @RequiredArgsConstructor
 public class IncidentService {
@@ -75,6 +78,48 @@ public class IncidentService {
         //aqui estoy llamando al static metodo de la clase  le pasa la lista de incidentes  y el map lo que hace es transformar cada objto de esa lista a un objeto to response  . 
         //to list lo pone en una lista
         return IncidentListResponse.of(visible.stream().map(IncidentService::toResponse).toList());
+    }
+
+    /**
+     * Detalle de un incidente (RF-9). El supervisor puede ver cualquiera; el técnico solo los que
+     * tiene asignados.
+     */
+    @Transactional(readOnly = true)
+    public IncidentDetailResponse getIncident(User activeUser, Long id) {
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        //si el inciente no ha sido asignado aun tecnico  , es decir el incidente se encuentra e la cuenta del supervisor  y se
+        //identifico que este usuario esta logeado y esta en la base de datos .Devuelve true  
+        boolean ownIncident =//si el incidente no ha sido asignado aun tecnico
+                incident.getAssignedTo() != null
+                        && incident.getAssignedTo().getId().equals(activeUser.getId());
+        //si el rol es diferente que el supervisor y el incidente le pertenece aun tecnico , hay que verificar 
+        //si el usuario que tiene la sección actual es al que ha sido seleccionado para resolver el incidente , sino sale error 
+        if (activeUser.getRole() != Role.SUPERVISOR && !ownIncident) {
+            throw new RoleNotAllowedException("Solo puedes ver los incidentes que tienes asignados.");
+        }
+
+        return toDetailResponse(incident);
+    }
+
+    private static IncidentDetailResponse toDetailResponse(Incident incident) {
+        return new IncidentDetailResponse(
+                incident.getId(),
+                incident.getTitle(),
+                incident.getDescription(),
+                incident.getStatus().name(),
+                incident.getClassificationStatus().name(),
+                incident.getType() == null ? null : incident.getType().name(),
+                incident.getPriority() == null ? null : incident.getPriority().name(),
+                incident.getArea() == null ? null : incident.getArea().name(),
+                incident.getCreatedBy().getId(),
+                incident.getAssignedTo() == null ? null : incident.getAssignedTo().getId(),
+                incident.getSolution(),
+                incident.getClosureReason() == null ? null : incident.getClosureReason().name(),
+                incident.getCreatedAt(),
+                incident.getAssignedAt(),
+                incident.getStartedAt(),
+                incident.getClosedAt());
     }
 
     private static IncidentResponse toResponse(Incident incident) {

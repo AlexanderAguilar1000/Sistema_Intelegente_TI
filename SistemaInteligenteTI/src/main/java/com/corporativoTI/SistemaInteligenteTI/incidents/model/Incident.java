@@ -68,8 +68,26 @@ public class Incident {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
+    /** Solución escrita al resolver (RF-12). */
+    @Column(columnDefinition = "TEXT")
+    private String solution;
+
+    /** Motivo de cierre sin solución (RF-14). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "closure_reason", length = 25)
+    private ClosureReason closureReason;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "assigned_at")
+    private Instant assignedAt;
+
+    @Column(name = "started_at")
+    private Instant startedAt;
+
+    @Column(name = "closed_at")
+    private Instant closedAt;
 
     /** Bloqueo optimista para acciones concurrentes sobre el mismo incidente. */
     @Version

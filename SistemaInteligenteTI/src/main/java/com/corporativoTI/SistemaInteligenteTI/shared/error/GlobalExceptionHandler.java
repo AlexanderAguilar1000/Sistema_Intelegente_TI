@@ -1,5 +1,6 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.InvalidTransitionException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
@@ -33,6 +34,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleRoleNotAllowed(RoleNotAllowedException ex) {
         return new ErrorResponse("FORBIDDEN_ROLE", ex.getMessage());
+    }
+
+    @ExceptionHandler(IncidentNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleIncidentNotFound(IncidentNotFoundException ex) {
+        return new ErrorResponse("INCIDENT_NOT_FOUND", ex.getMessage());
     }
 
     @ExceptionHandler(MissingFieldException.class)

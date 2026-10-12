@@ -2,6 +2,7 @@ package com.corporativoTI.SistemaInteligenteTI.incidents.controller;
 
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.service.IncidentService;
@@ -10,6 +11,7 @@ import com.corporativoTI.SistemaInteligenteTI.users.web.ActiveUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Registro (RF-3) y listado con filtro por prioridad (RF-8) de incidentes. */
+/** Registro (RF-3) y listado con filtro por prioridad (RF-8) y detalle (RF-9) de incidentes. */
 @RestController
 @RequestMapping("/api/incidents")
 @RequiredArgsConstructor
@@ -36,5 +38,10 @@ public class IncidentController {
     public IncidentListResponse listIncidents(
             @ActiveUser User activeUser, @RequestParam(required = false) Priority priority) {
         return incidentService.listIncidents(activeUser, priority);
+    }
+
+    @GetMapping("/{id}")
+    public IncidentDetailResponse getIncident(@ActiveUser User activeUser, @PathVariable Long id) {
+        return incidentService.getIncident(activeUser, id);
     }
 }
