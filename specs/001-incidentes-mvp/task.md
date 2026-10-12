@@ -48,7 +48,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-11 · Listar incidentes según quién mira** — RF-8
   **Hecho cuando:** el supervisor recibe todos los incidentes y el técnico solo los suyos, en la misma llamada `GET /api/incidents`; test con dos técnicos y un supervisor.
 
-- [ ] **T-12 · Filtrar el listado por prioridad** — RF-8
+- [x] **T-12 · Filtrar el listado por prioridad** — RF-8
   **Hecho cuando:** `GET /api/incidents?priority=HIGH` devuelve solo los de prioridad alta dentro de los visibles, los pendientes de clasificación quedan fuera del filtro, y sin resultados se indica que la lista está vacía; tests.
 
 - [ ] **T-13 · Ver el detalle de un incidente** — RF-9

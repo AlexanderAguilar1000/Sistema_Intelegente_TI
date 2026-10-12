@@ -1,5 +1,8 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.model;
 
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,6 +46,19 @@ public class Incident {
     @Enumerated(EnumType.STRING)
     @Column(name = "classification_status", nullable = false, length = 25)
     private ClassificationStatus classificationStatus;
+
+    /** Clasificación (RF-4): los tres campos son nulos mientras esté pendiente. */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private IncidentType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Priority priority;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private Area area;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false, updatable = false)

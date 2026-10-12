@@ -85,7 +85,7 @@ class IncidentListControllerTest {
         listAs(supervisor)
                 .andExpect(status().isOk())
                 .andExpect(
-                        jsonPath("$[*].title")
+                        jsonPath("$.incidents[*].title")
                                 .value(hasItems("T11 sin asignar", "T11 de A", "T11 de B")));
     }
 
@@ -97,9 +97,9 @@ class IncidentListControllerTest {
 
         listAs(technicianA)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(ofA.getId()))
-                .andExpect(jsonPath("$[0].title").value("T11 de A"));
+                .andExpect(jsonPath("$.incidents", hasSize(1)))
+                .andExpect(jsonPath("$.incidents[0].id").value(ofA.getId()))
+                .andExpect(jsonPath("$.incidents[0].title").value("T11 de A"));
     }
 
     @Test
@@ -109,16 +109,16 @@ class IncidentListControllerTest {
 
         listAs(technicianB)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].title").value("T11 de B"))
-                .andExpect(jsonPath("$[*].title").value(not(hasItems("T11 de A"))));
+                .andExpect(jsonPath("$.incidents", hasSize(1)))
+                .andExpect(jsonPath("$.incidents[0].title").value("T11 de B"))
+                .andExpect(jsonPath("$.incidents[*].title").value(not(hasItems("T11 de A"))));
     }
 
     @Test
     void technicianWithoutIncidentsGetsEmptyList() throws Exception {
         createIncident("T11 de B", technicianB);
 
-        listAs(technicianA).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+        listAs(technicianA).andExpect(status().isOk()).andExpect(jsonPath("$.incidents", hasSize(0)));
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /** Traduce las excepciones de dominio a la respuesta de error homogénea de la API. */
 @RestControllerAdvice
@@ -38,6 +39,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErrorResponse handleMissingField(MissingFieldException ex) {
         return new ErrorResponse("MISSING_FIELD", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleInvalidParameter(MethodArgumentTypeMismatchException ex) {
+        return new ErrorResponse(
+                "INVALID_PARAMETER",
+                "Valor no válido para el parámetro '" + ex.getName() + "': " + ex.getValue());
     }
 
     @ExceptionHandler(InvalidAreaException.class)

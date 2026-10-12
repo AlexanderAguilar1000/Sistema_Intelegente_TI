@@ -1,6 +1,8 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
@@ -46,14 +48,33 @@ public class IncidentService {
         return toResponse(saved);
     }
 
-    /** Lista los incidentes visibles: todos para el supervisor, solo los asignados al técnico (RF-8). */
+    /**
+     * Lista los incidentes visibles: todos para el supervisor, solo los asignados al técnico. Con
+     * {@code priority} filtra por esa prioridad; los pendientes de clasificar quedan fuera (RF-8).
+     */
     @Transactional(readOnly = true)
-    public List<IncidentResponse> listIncidents(User activeUser) {
-        List<Incident> visible =
-                activeUser.getRole() == Role.SUPERVISOR
-                        ? incidentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
-                        : incidentRepository.findByAssignedToOrderByCreatedAtDesc(activeUser);
-        return visible.stream().map(IncidentService::toResponse).toList();
+    public IncidentListResponse listIncidents(User activeUser, Priority priority) {
+        boolean supervisor = activeUser.getRole() == Role.SUPERVISOR;
+        List<Incident> visible;
+        if (priority == null) {
+            //aca mira al supervisor , si es supervisor y no tiene prioridad le devuelve todos los incidentes del supervisor ,
+            //si es un tecnico y no hay prioridad le devuelve incidentes asignados a un tecnico
+            visible =
+                    supervisor
+                            ? incidentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                            : incidentRepository.findByAssignedToOrderByCreatedAtDesc(activeUser);
+        } else { 
+            //aca mira si es supervisor y si tiene prioridad y devuelve la lista de incidentes que tiene el supervisor y filtrado prioridad     
+            //si es tecnico filtra por prioridad y el rol que es tecnico 
+            visible =
+                    supervisor
+                            ? incidentRepository.findByPriorityOrderByCreatedAtDesc(priority)
+                            : incidentRepository.findByAssignedToAndPriorityOrderByCreatedAtDesc(
+                                    activeUser, priority);
+        }
+        //aqui estoy llamando al static metodo de la clase  le pasa la lista de incidentes  y el map lo que hace es transformar cada objto de esa lista a un objeto to response  . 
+        //to list lo pone en una lista
+        return IncidentListResponse.of(visible.stream().map(IncidentService::toResponse).toList());
     }
 
     private static IncidentResponse toResponse(Incident incident) {
@@ -63,6 +84,7 @@ public class IncidentService {
                 incident.getDescription(),
                 incident.getStatus().name(),
                 incident.getClassificationStatus().name(),
+                incident.getPriority() == null ? null : incident.getPriority().name(),
                 incident.getCreatedBy().getId(),
                 incident.getCreatedAt());
     }
