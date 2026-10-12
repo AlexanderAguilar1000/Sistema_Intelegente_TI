@@ -33,7 +33,7 @@ public class IncidentStateMachine {
 
         TRANSITIONS.get(IncidentStatus.IN_PROGRESS).put(IncidentAction.RESOLVE, IncidentStatus.RESOLVED);
     }
-}
+
     //esto permite ver si una acción es válida para un estado dado
     public boolean canApply(IncidentStatus from, IncidentAction action) {
         return TRANSITIONS.get(from).containsKey(action);

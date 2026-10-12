@@ -45,7 +45,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-10 · Fijar las transiciones válidas del incidente** — RF-3, RF-7, RF-10, RF-12, RF-14
   **Hecho cuando:** un test unitario recorre las transiciones de la sección 4 del plan, acepta todas las válidas y rechaza las inválidas (resolver sin iniciar, actuar sobre un cerrado, etc.).
 
-- [ ] **T-11 · Listar incidentes según quién mira** — RF-8
+- [x] **T-11 · Listar incidentes según quién mira** — RF-8
   **Hecho cuando:** el supervisor recibe todos los incidentes y el técnico solo los suyos, en la misma llamada `GET /api/incidents`; test con dos técnicos y un supervisor.
 
 - [ ] **T-12 · Filtrar el listado por prioridad** — RF-8

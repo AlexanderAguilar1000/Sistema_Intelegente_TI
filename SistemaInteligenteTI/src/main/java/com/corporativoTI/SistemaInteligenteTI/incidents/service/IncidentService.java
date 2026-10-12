@@ -7,13 +7,17 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.repository.IncidentRepository;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
+import com.corporativoTI.SistemaInteligenteTI.users.model.Role;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.service.RoleGuard;
 import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/** Casos de uso sobre incidentes: registro (RF-3). */
+/** Casos de uso sobre incidentes: registro (RF-3) y listado según el usuario activo (RF-8). */
 @Service
 @RequiredArgsConstructor
 public class IncidentService {
@@ -39,14 +43,28 @@ public class IncidentService {
         incident.setCreatedAt(Instant.now());
         Incident saved = incidentRepository.save(incident);
 
+        return toResponse(saved);
+    }
+
+    /** Lista los incidentes visibles: todos para el supervisor, solo los asignados al técnico (RF-8). */
+    @Transactional(readOnly = true)
+    public List<IncidentResponse> listIncidents(User activeUser) {
+        List<Incident> visible =
+                activeUser.getRole() == Role.SUPERVISOR
+                        ? incidentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                        : incidentRepository.findByAssignedToOrderByCreatedAtDesc(activeUser);
+        return visible.stream().map(IncidentService::toResponse).toList();
+    }
+
+    private static IncidentResponse toResponse(Incident incident) {
         return new IncidentResponse(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getDescription(),
-                saved.getStatus().name(),
-                saved.getClassificationStatus().name(),
-                activeUser.getId(),
-                saved.getCreatedAt());
+                incident.getId(),
+                incident.getTitle(),
+                incident.getDescription(),
+                incident.getStatus().name(),
+                incident.getClassificationStatus().name(),
+                incident.getCreatedBy().getId(),
+                incident.getCreatedAt());
     }
 
     private static String requireText(String value, String field) {
