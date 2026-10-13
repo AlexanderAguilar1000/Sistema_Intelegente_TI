@@ -1,6 +1,8 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.InvalidTransitionException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
@@ -40,6 +42,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleIncidentNotFound(IncidentNotFoundException ex) {
         return new ErrorResponse("INCIDENT_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(IncidentClosedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleIncidentClosed(IncidentClosedException ex) {
+        return new ErrorResponse("INCIDENT_CLOSED", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCatalogValueException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleInvalidCatalogValue(InvalidCatalogValueException ex) {
+        return new ErrorResponse("INVALID_CATALOG_VALUE", ex.getMessage());
     }
 
     @ExceptionHandler(MissingFieldException.class)

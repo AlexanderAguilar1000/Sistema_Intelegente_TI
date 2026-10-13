@@ -3,6 +3,7 @@ package com.corporativoTI.SistemaInteligenteTI.incidents.model;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -88,6 +89,21 @@ public class Incident {
 
     @Column(name = "closed_at")
     private Instant closedAt;
+
+    /**
+     * Fija la clasificación a mano y la deja como corregida manualmente (RF-6). Un incidente en
+     * estado final no admite cambios.
+     */
+    public void classifyManually(IncidentType type, Priority priority, Area area) {
+        //si el estado del incidente es final es decir ya se termino no se puede modificar el estado del incidente
+        if (status.isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        this.type = type;
+        this.priority = priority;
+        this.area = area;
+        this.classificationStatus = ClassificationStatus.MANUALLY_CORRECTED;
+    }
 
     /** Bloqueo optimista para acciones concurrentes sobre el mismo incidente. */
     @Version

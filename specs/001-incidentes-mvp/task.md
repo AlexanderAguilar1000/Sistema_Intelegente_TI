@@ -54,7 +54,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-13 · Ver el detalle de un incidente** — RF-9
   **Hecho cuando:** `GET /api/incidents/{id}` devuelve título, descripción, clasificación, estado, fechas y solución o motivo de cierre; un técnico que pide un incidente ajeno recibe 403 y el supervisor puede ver cualquiera; tests.
 
-- [ ] **T-14 · Clasificar un incidente a mano** — RF-6
+- [x] **T-14 · Clasificar un incidente a mano** — RF-6
   **Hecho cuando:** `PATCH /api/incidents/{id}/classification` fija tipo, prioridad y área con valores de catálogo, quita la marca de pendiente y deja la clasificación como corregida manualmente; sobre un incidente cerrado devuelve 409; tests.
 
 - [ ] **T-15 · Asignar un incidente a un técnico de su área** — RF-7

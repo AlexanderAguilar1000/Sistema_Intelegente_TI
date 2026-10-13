@@ -1,11 +1,15 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ClassifyIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStatus;
@@ -22,7 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Casos de uso sobre incidentes: registro (RF-3) y listado según el usuario activo (RF-8) y detalle (RF-9). */
+/** Casos de uso sobre incidentes: registro (RF-3) y listado según el usuario activo (RF-8) detalle (RF-9) y clasificación manual (RF-6). */
 @Service
 @RequiredArgsConstructor
 public class IncidentService {
@@ -100,6 +104,35 @@ public class IncidentService {
         }
 
         return toDetailResponse(incident);
+    }
+
+    /**
+     * Fija tipo, prioridad y área a mano, solo el supervisor (RF-6). Los tres valores son
+     * obligatorios y deben pertenecer al catálogo.
+     */
+    @Transactional
+    public IncidentDetailResponse classifyManually(
+            User activeUser, Long id, ClassifyIncidentRequest request) {
+        roleGuard.requireSupervisor(activeUser);//mira que es el supervisor 
+        IncidentType type = parseCatalogValue(IncidentType.class, "type", request.type());
+        Priority priority = parseCatalogValue(Priority.class, "priority", request.priority());
+        Area area = parseCatalogValue(Area.class, "area", request.area());
+
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        incident.classifyManually(type, priority, area);
+        return toDetailResponse(incidentRepository.save(incident));
+    }
+
+    private static <E extends Enum<E>> E parseCatalogValue(Class<E> catalog, String field, String value) {
+        if (value == null || value.isBlank()) {
+            throw new MissingFieldException(field);
+        }
+        try {
+            return Enum.valueOf(catalog, value.trim());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidCatalogValueException(field, value);
+        }
     }
 
     private static IncidentDetailResponse toDetailResponse(Incident incident) {
