@@ -1,8 +1,11 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.TechnicianAreaMismatchException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.InvalidTransitionException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingActiveUserException;
@@ -48,6 +51,24 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleIncidentClosed(IncidentClosedException ex) {
         return new ErrorResponse("INCIDENT_CLOSED", ex.getMessage());
+    }
+
+    @ExceptionHandler(IncidentNotClassifiedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleIncidentNotClassified(IncidentNotClassifiedException ex) {
+        return new ErrorResponse("INCIDENT_NOT_CLASSIFIED", ex.getMessage());
+    }
+
+    @ExceptionHandler(TechnicianAreaMismatchException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleTechnicianAreaMismatch(TechnicianAreaMismatchException ex) {
+        return new ErrorResponse("TECHNICIAN_AREA_MISMATCH", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTechnicianException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleInvalidTechnician(InvalidTechnicianException ex) {
+        return new ErrorResponse("INVALID_TECHNICIAN", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidCatalogValueException.class)

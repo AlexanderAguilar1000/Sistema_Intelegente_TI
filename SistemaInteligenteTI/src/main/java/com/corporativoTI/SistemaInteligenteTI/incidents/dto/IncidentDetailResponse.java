@@ -14,6 +14,7 @@ public record IncidentDetailResponse(
         String area,
         Long createdBy,
         Long assignedTo,
+        Long assignedBy,
         String solution,
         String closureReason,
         Instant createdAt,

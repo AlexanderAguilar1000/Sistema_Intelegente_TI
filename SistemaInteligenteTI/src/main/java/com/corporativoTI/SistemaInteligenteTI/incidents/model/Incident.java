@@ -4,6 +4,8 @@ import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.TechnicianAreaMismatchException;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,6 +71,11 @@ public class Incident {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
+    /** Supervisor que hizo la asignación vigente (RF-7). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_by")
+    private User assignedBy;
+
     /** Solución escrita al resolver (RF-12). */
     @Column(columnDefinition = "TEXT")
     private String solution;
@@ -103,6 +110,26 @@ public class Incident {
         this.priority = priority;
         this.area = area;
         this.classificationStatus = ClassificationStatus.MANUALLY_CORRECTED;
+    }
+
+    /**
+     * Asigna el incidente a un técnico de su área (RF-7). {@code newStatus} lo decide la máquina de
+     * estados; aquí solo se comprueban las reglas propias del incidente.
+     */
+    public void assignTo(User technician, User supervisor, IncidentStatus newStatus, Instant now) {
+        if (status.isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        if (classificationStatus == ClassificationStatus.PENDING) {
+            throw new IncidentNotClassifiedException(id);
+        }
+        if (technician.getArea() != area) {
+            throw new TechnicianAreaMismatchException(technician.getArea(), area);
+        }
+        this.assignedTo = technician;
+        this.assignedBy = supervisor;
+        this.assignedAt = now;
+        this.status = newStatus;
     }
 
     /** Bloqueo optimista para acciones concurrentes sobre el mismo incidente. */

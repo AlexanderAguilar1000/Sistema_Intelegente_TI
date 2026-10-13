@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
  * Única fuente de las transiciones de estado del incidente (plan, sección 4). Solo conoce el grafo
  * de estados; las condiciones de cada caso de uso (área del técnico, longitud de la solución, rol)
  * las comprueban los servicios.
+ * PERMITE CAMBIAR EL ESTADO DEL INCIDENTE , TIENE UN ORDEN DE ESTADO QUE DEBE CAMBIARSE NO PUEDE CAMBIAR DE REGISTRADO A SOLUCIONADO , DEBE PASAR 
+ * POR LOS DEMAS ESTADOS
  */
 @Component
 public class IncidentStateMachine {

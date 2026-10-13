@@ -1,6 +1,7 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.controller;
 
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.AssignIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ClassifyIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,5 +55,11 @@ public class IncidentController {
             @PathVariable Long id,//id del incidente 
             @RequestBody ClassifyIncidentRequest request) {//incidente cambio
         return incidentService.classifyManually(activeUser, id, request);
+    }
+
+    @PutMapping("/{id}/assignment")
+    public IncidentDetailResponse assignIncident(
+            @ActiveUser User activeUser, @PathVariable Long id, @RequestBody AssignIncidentRequest request) {
+        return incidentService.assignIncident(activeUser, id, request);
     }
 }

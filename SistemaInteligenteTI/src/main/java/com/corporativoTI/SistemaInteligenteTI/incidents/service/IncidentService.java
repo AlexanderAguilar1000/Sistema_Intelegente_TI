@@ -3,21 +3,27 @@ package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.AssignIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ClassifyIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
+import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentAction;
+import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStateMachine;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.repository.IncidentRepository;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.MissingFieldException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.RoleNotAllowedException;
 import com.corporativoTI.SistemaInteligenteTI.users.model.Role;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
+import com.corporativoTI.SistemaInteligenteTI.users.repository.UserRepository;
 import com.corporativoTI.SistemaInteligenteTI.users.service.RoleGuard;
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class IncidentService {
 
     private final IncidentRepository incidentRepository;
+    private final UserRepository userRepository;
+    private final IncidentStateMachine stateMachine;
     private final RoleGuard roleGuard;
 
     /**
@@ -114,14 +122,44 @@ public class IncidentService {
     public IncidentDetailResponse classifyManually(
             User activeUser, Long id, ClassifyIncidentRequest request) {
         roleGuard.requireSupervisor(activeUser);//mira que es el supervisor 
-        IncidentType type = parseCatalogValue(IncidentType.class, "type", request.type());
-        Priority priority = parseCatalogValue(Priority.class, "priority", request.priority());
+        IncidentType type = parseCatalogValue(IncidentType.class, "type", request.type());//esto verifica que esta dentro del enum el valor que el 
+        Priority priority = parseCatalogValue(Priority.class, "priority", request.priority());//usuario quiere cambiar 
         Area area = parseCatalogValue(Area.class, "area", request.area());
 
         Incident incident =
-                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));//encontrar el incidente que se quiere cambiar 
         incident.classifyManually(type, priority, area);
-        return toDetailResponse(incidentRepository.save(incident));
+        return toDetailResponse(incidentRepository.save(incident));//guarda en la base de datos  y se lo envia al todetailresponse y lo envia al enpoind 
+    }
+
+    /**
+     * Asigna un incidente clasificado a un técnico de su área, solo el supervisor (RF-7). Registra
+     * técnico, fecha y supervisor; el estado resultante lo fija la máquina de estados.
+     */
+    @Transactional
+    public IncidentDetailResponse assignIncident(User activeUser, Long id, AssignIncidentRequest request) {
+        roleGuard.requireSupervisor(activeUser);//mira que es el supervisor
+        if (request.technicianId() == null) {//el id del tecnico tiene que estar registrado en la base de datos 
+            throw new MissingFieldException("technicianId");
+        }
+
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));//busca el incidente
+        User technician =
+                userRepository
+                        .findById(request.technicianId())//busca el id del tecnico
+                        .filter(user -> user.getRole() == Role.TECHNICIAN)//mira que su rol sea tecnico 
+                        .orElseThrow(() -> new InvalidTechnicianException(request.technicianId()));//si no es tecnico sale error 
+
+        // Los estados finales y la clasificación pendiente se rechazan antes que la transición o asignación del incidente a un técnico.
+        if (incident.getStatus().isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        //state maching permite cambiar el estado del incidente de registrado a asignado , de asignado a en progreso , de en progreso a resuelto , etc
+        //CAMBIA EL estado de un incidente de registrado a asignado
+        IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.ASSIGN);
+        incident.assignTo(technician, activeUser, target, Instant.now());//asgina el icidente 
+        return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo devuelve al enpoind 
     }
 
     private static <E extends Enum<E>> E parseCatalogValue(Class<E> catalog, String field, String value) {
@@ -129,7 +167,8 @@ public class IncidentService {
             throw new MissingFieldException(field);
         }
         try {
-            return Enum.valueOf(catalog, value.trim());
+            return Enum.valueOf(catalog, value.trim());//si el valor esta dentro del enum  perfecto devuelve el valor  value , sino devuelve error
+                                                       //diciendo que no se encuentra el valor dentro del enum  y lanza la excepcion InvalidCatalogValueException
         } catch (IllegalArgumentException ex) {
             throw new InvalidCatalogValueException(field, value);
         }
@@ -147,6 +186,7 @@ public class IncidentService {
                 incident.getArea() == null ? null : incident.getArea().name(),
                 incident.getCreatedBy().getId(),
                 incident.getAssignedTo() == null ? null : incident.getAssignedTo().getId(),
+                incident.getAssignedBy() == null ? null : incident.getAssignedBy().getId(),
                 incident.getSolution(),
                 incident.getClosureReason() == null ? null : incident.getClosureReason().name(),
                 incident.getCreatedAt(),

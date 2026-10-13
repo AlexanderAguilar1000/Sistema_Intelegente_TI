@@ -57,7 +57,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-14 · Clasificar un incidente a mano** — RF-6
   **Hecho cuando:** `PATCH /api/incidents/{id}/classification` fija tipo, prioridad y área con valores de catálogo, quita la marca de pendiente y deja la clasificación como corregida manualmente; sobre un incidente cerrado devuelve 409; tests.
 
-- [ ] **T-15 · Asignar un incidente a un técnico de su área** — RF-7
+- [x] **T-15 · Asignar un incidente a un técnico de su área** — RF-7
   **Hecho cuando:** `PUT /api/incidents/{id}/assignment` pasa el incidente a Asignado y registra técnico, fecha y supervisor; un técnico de otra área se rechaza con motivo, y un incidente pendiente de clasificación no se puede asignar; tests de los tres casos.
 
 - [ ] **T-16 · Reasignar y retirar la asignación al cambiar el área** — RF-6, RF-7
