@@ -126,7 +126,13 @@ class IncidentManualClassificationTest {
     void correctsAnAiClassificationWithoutChangingTheStatus() throws Exception {
         Incident incident = classifiedIncident(IncidentStatus.IN_PROGRESS);
 
-        classify(supervisor, incident.getId(), VALID_BODY)
+        // Mismo área que el técnico asignado: cambiar a otra área retira la asignación (T-16).
+        classify(
+                        supervisor,
+                        incident.getId(),
+                        """
+                        {"type": "NETWORK", "priority": "LOW", "area": "APPLICATIONS"}
+                        """)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
                 .andExpect(jsonPath("$.priority").value("LOW"))

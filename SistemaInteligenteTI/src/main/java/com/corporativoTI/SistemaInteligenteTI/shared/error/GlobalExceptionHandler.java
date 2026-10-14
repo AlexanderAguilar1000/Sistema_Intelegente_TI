@@ -5,6 +5,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotCla
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.SolutionTooShortException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.TechnicianAreaMismatchException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.InvalidTransitionException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.InvalidAreaException;
@@ -81,6 +82,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErrorResponse handleMissingField(MissingFieldException ex) {
         return new ErrorResponse("MISSING_FIELD", ex.getMessage());
+    }
+
+    @ExceptionHandler(SolutionTooShortException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleSolutionTooShort(SolutionTooShortException ex) {
+        return new ErrorResponse("SOLUTION_TOO_SHORT", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

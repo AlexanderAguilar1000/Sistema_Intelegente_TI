@@ -3,10 +3,12 @@ package com.corporativoTI.SistemaInteligenteTI.incidents.controller;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.AssignIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ClassifyIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CloseIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ResolveIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.service.IncidentService;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.web.ActiveUser;
@@ -55,6 +57,23 @@ public class IncidentController {
             @PathVariable Long id,//id del incidente 
             @RequestBody ClassifyIncidentRequest request) {//incidente cambio
         return incidentService.classifyManually(activeUser, id, request);
+    }
+
+    @PostMapping("/{id}/start")
+    public IncidentDetailResponse startIncident(@ActiveUser User activeUser, @PathVariable Long id) {
+        return incidentService.startIncident(activeUser, id);
+    }
+
+    @PostMapping("/{id}/resolution")
+    public IncidentDetailResponse resolveIncident(
+            @ActiveUser User activeUser, @PathVariable Long id, @RequestBody ResolveIncidentRequest request) {
+        return incidentService.resolveIncident(activeUser, id, request);
+    }
+
+    @PostMapping("/{id}/closure")
+    public IncidentDetailResponse closeIncident(
+            @ActiveUser User activeUser, @PathVariable Long id, @RequestBody CloseIncidentRequest request) {
+        return incidentService.closeWithoutSolution(activeUser, id, request);
     }
 
     @PutMapping("/{id}/assignment")

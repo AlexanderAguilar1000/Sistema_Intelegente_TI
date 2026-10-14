@@ -5,6 +5,7 @@ import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.SolutionTooShortException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.TechnicianAreaMismatchException;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import jakarta.persistence.Column;
@@ -31,6 +32,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Incident {
+
+    /** Longitud mínima de la solución para resolver un incidente (RF-12). */
+    public static final int MIN_SOLUTION_LENGTH = 30;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -112,23 +116,80 @@ public class Incident {
         this.classificationStatus = ClassificationStatus.MANUALLY_CORRECTED;
     }
 
+    /** Indica si {@code user} es el técnico asignado vigente del incidente (RF-9, RF-10). */
+    //si hay algun asignado 
+    //assignedTo es objeto de la clase User , entonces dice si no hay ninguna persona asignada al incidente  y si hay un asignado , pero el id del asignado no  o concuerda con el usuario que esta logeado actualmente
+    //el sistema lo detecta y devuelve error ( Si la persona asignada al incidente es la misma que la persona que esta logeada devuelve true )
+    public boolean isAssignedTo(User user) {
+        return assignedTo != null && assignedTo.getId().equals(user.getId());
+    }
+
+    /** Inicia el trabajo (RF-10). {@code newStatus} lo decide la máquina de estados. */
+    public void start(IncidentStatus newStatus, Instant now) {
+        this.startedAt = now;
+        this.status = newStatus;
+    }
+
     /**
-     * Asigna el incidente a un técnico de su área (RF-7). {@code newStatus} lo decide la máquina de
-     * estados; aquí solo se comprueban las reglas propias del incidente.
+     * Resuelve el incidente con su solución (RF-12). {@code newStatus} lo decide la máquina de
+     * estados; aquí se exige la longitud mínima de la solución y se registra la fecha de cierre. El
+     * técnico responsable es el asignado vigente.
+     */
+    public void resolve(String solution, IncidentStatus newStatus, Instant now) {
+        if (solution.length() < MIN_SOLUTION_LENGTH) {//si la solución es menor de 30 caracteres aparece la oslución deb tener minimo esta cantidad de caracteres . 
+            throw new SolutionTooShortException(MIN_SOLUTION_LENGTH);
+        }
+        this.solution = solution;
+        this.closedAt = now;
+        this.status = newStatus;
+    }
+
+    /**
+     * Cierra el incidente sin solución (RF-14). {@code newStatus} lo decide la máquina de estados;
+     * aquí se registran el motivo y la fecha de cierre, sin exigir texto de solución.
+     */
+    public void closeWithoutSolution(ClosureReason reason, IncidentStatus newStatus, Instant now) {
+        this.closureReason = reason;
+        this.closedAt = now;
+        this.status = newStatus;
+    }
+
+    /** Indica si el técnico asignado deja de pertenecer al área vigente del incidente (RF-6). */
+    public boolean assignmentExcludedByArea() {
+        return assignedTo != null && assignedTo.getArea() != area;
+    }
+
+    /**
+     * Retira la asignación al cambiar el área (RF-6). {@code newStatus} lo decide la máquina de
+     * estados; si el trabajo había empezado, se descarta su fecha de inicio.
+     */
+    public void withdrawAssignment(IncidentStatus newStatus) {
+        this.assignedTo = null;
+        this.assignedBy = null;
+        this.assignedAt = null;
+        this.startedAt = null;
+        this.status = newStatus;
+    }
+
+    /**
+     * Asigna o reasigna el incidente a un técnico de su área (RF-7). {@code newStatus} lo decide la
+     * máquina de estados; aquí solo se comprueban las reglas propias del incidente. Al reasignar un
+     * incidente en progreso vuelve a Asignado y se descarta su fecha de inicio.
      */
     public void assignTo(User technician, User supervisor, IncidentStatus newStatus, Instant now) {
-        if (status.isFinal()) {
+        if (status.isFinal()) {//no se puede modificar un incidente que ya esta cerrado
             throw new IncidentClosedException(id);
         }
-        if (classificationStatus == ClassificationStatus.PENDING) {
+        if (classificationStatus == ClassificationStatus.PENDING) { //antes de asignar un incidente a una persona el sistema debe de clasificarlo automaticamente 
             throw new IncidentNotClassifiedException(id);
         }
-        if (technician.getArea() != area) {
+        if (technician.getArea() != area) { //solo se puede asignar a un técnico de su área
             throw new TechnicianAreaMismatchException(technician.getArea(), area);
         }
-        this.assignedTo = technician;
+        this.assignedTo = technician;///cumple todo esto y guarda los valores 
         this.assignedBy = supervisor;
         this.assignedAt = now;
+        this.startedAt = null;
         this.status = newStatus;
     }
 

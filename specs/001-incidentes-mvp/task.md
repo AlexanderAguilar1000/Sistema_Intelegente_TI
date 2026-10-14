@@ -60,16 +60,16 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-15 · Asignar un incidente a un técnico de su área** — RF-7
   **Hecho cuando:** `PUT /api/incidents/{id}/assignment` pasa el incidente a Asignado y registra técnico, fecha y supervisor; un técnico de otra área se rechaza con motivo, y un incidente pendiente de clasificación no se puede asignar; tests de los tres casos.
 
-- [ ] **T-16 · Reasignar y retirar la asignación al cambiar el área** — RF-6, RF-7
+- [x] **T-16 · Reasignar y retirar la asignación al cambiar el área** — RF-6, RF-7
   **Hecho cuando:** reasignar a otro técnico del área deja el incidente en Asignado con el nuevo responsable; cambiar el área a una que excluye al técnico actual lo devuelve a Registrado sin técnico; el técnico anterior que intenta actuar recibe 403; tests.
 
-- [ ] **T-17 · Iniciar el trabajo de un incidente** — RF-10
+- [x] **T-17 · Iniciar el trabajo de un incidente** — RF-10
   **Hecho cuando:** `POST /api/incidents/{id}/start` pasa a En progreso solo si lo pide el técnico asignado; otro técnico recibe 403 y un estado incorrecto 409; tests.
 
-- [ ] **T-18 · Resolver un incidente con su solución** — RF-12
+- [x] **T-18 · Resolver un incidente con su solución** — RF-12
   **Hecho cuando:** `POST /api/incidents/{id}/resolution` con 30 caracteres o más pasa a Resuelto y guarda solución, fecha y técnico; con menos de 30 devuelve 422; si no está En progreso devuelve 409; tests.
 
-- [ ] **T-19 · Cerrar un incidente sin solución** — RF-14
+- [x] **T-19 · Cerrar un incidente sin solución** — RF-14
   **Hecho cuando:** `POST /api/incidents/{id}/closure` con motivo (duplicado, no reproducible o descartado) pasa a Cerrado sin solución y no exige texto de solución; sin motivo devuelve 422; tests.
 
 - [ ] **T-20 · Bloquear cambios sobre incidentes cerrados** — RF-12, RF-14

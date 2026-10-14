@@ -5,15 +5,18 @@ import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.AssignIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ClassifyIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CloseIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.CreateIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ResolveIncidentRequest;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
+import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClosureReason;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentAction;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStateMachine;
@@ -129,6 +132,12 @@ public class IncidentService {
         Incident incident =
                 incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));//encontrar el incidente que se quiere cambiar 
         incident.classifyManually(type, priority, area);
+        // Si el nuevo área excluye al técnico actual, el incidente vuelve a Registrado sin técnico.
+        //Si cambia el area del incidente y el tecnico asignado no pertenece a esa area , se retira la asignacion y se cambia el estado del incidente a registrado
+        if (incident.assignmentExcludedByArea()) {
+            incident.withdrawAssignment(
+                    stateMachine.transition(incident.getStatus(), IncidentAction.UNASSIGN_BY_AREA_CHANGE));
+        }
         return toDetailResponse(incidentRepository.save(incident));//guarda en la base de datos  y se lo envia al todetailresponse y lo envia al enpoind 
     }
 
@@ -157,9 +166,78 @@ public class IncidentService {
         }
         //state maching permite cambiar el estado del incidente de registrado a asignado , de asignado a en progreso , de en progreso a resuelto , etc
         //CAMBIA EL estado de un incidente de registrado a asignado
-        IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.ASSIGN);
+        IncidentAction action =
+                incident.getStatus() == IncidentStatus.REGISTERED
+                        ? IncidentAction.ASSIGN
+                        : IncidentAction.REASSIGN;
+        IncidentStatus target = stateMachine.transition(incident.getStatus(), action);
         incident.assignTo(technician, activeUser, target, Instant.now());//asgina el icidente 
         return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo devuelve al enpoind 
+    }
+
+    /**
+     * Inicia el trabajo de un incidente (RF-10). Solo lo puede pedir el técnico asignado; el estado
+     * resultante lo fija la máquina de estados.
+     */
+    @Transactional
+    public IncidentDetailResponse startIncident(User activeUser, Long id) {
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        if (!incident.isAssignedTo(activeUser)) {//entonces mira incident.isAssignedTo(activeUser) esto si devuelve true significa que el tecnico asignado es igual al tencioc loggeado 
+                                                //entonces "!" esto cambia de true a false entonces  solo si el boleano devuelve true lanza la excepción , sino no . 
+            throw new RoleNotAllowedException("Solo el técnico asignado puede iniciar el incidente.");
+        }
+        if (incident.getStatus().isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        //cambia el estado del incidente a empezado
+        IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.START);
+        incident.start(target, Instant.now());
+        return toDetailResponse(incidentRepository.save(incident));
+    }
+
+    /**
+     * Resuelve un incidente con su solución (RF-12). Solo lo puede pedir el técnico asignado; el
+     * estado resultante lo fija la máquina de estados y la longitud mínima la exige el incidente.
+     */
+    @Transactional
+    public IncidentDetailResponse resolveIncident(User activeUser, Long id, ResolveIncidentRequest request) {
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        if (!incident.isAssignedTo(activeUser)) {
+            throw new RoleNotAllowedException("Solo el técnico asignado puede resolver el incidente.");
+        }
+        if (incident.getStatus().isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        String solution = requireText(request.solution(), "solution");
+        IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.RESOLVE);
+        incident.resolve(solution, target, Instant.now());//llama a este metodo para verificar si cumple con la cantidad minima de caracteres 
+        return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo convierte a to detailresponse para que el backend se lo pase a angular . 
+    }
+
+    /**
+     * Cierra un incidente sin solución indicando el motivo (RF-14). Solo lo puede pedir el técnico
+     * asignado; el estado resultante lo fija la máquina de estados.
+     */
+    @Transactional
+    public IncidentDetailResponse closeWithoutSolution(
+            User activeUser, Long id, CloseIncidentRequest request) {
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        //Lo que hace este "!" es convertir el booleano  asu valor contrario si devuelve true lo convierte y viceverda
+        //entonces solo 
+        if (!incident.isAssignedTo(activeUser)) {
+            throw new RoleNotAllowedException("Solo el técnico asignado puede cerrar el incidente.");
+        }
+        if (incident.getStatus().isFinal()) {
+            throw new IncidentClosedException(id);
+        }
+        ClosureReason reason = parseCatalogValue(ClosureReason.class, "reason", request.reason());
+        IncidentStatus target =
+                stateMachine.transition(incident.getStatus(), IncidentAction.CLOSE_WITHOUT_SOLUTION);
+        incident.closeWithoutSolution(reason, target, Instant.now());
+        return toDetailResponse(incidentRepository.save(incident));
     }
 
     private static <E extends Enum<E>> E parseCatalogValue(Class<E> catalog, String field, String value) {
