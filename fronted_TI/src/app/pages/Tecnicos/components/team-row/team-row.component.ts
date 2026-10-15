@@ -12,5 +12,8 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 })
 export class TeamRowComponent {
   user = input.required<User>();
-  email = computed(() => toCorporateEmail(this.user().username));
+  email = computed(() => {
+    const username = this.user().username;
+    return username ? toCorporateEmail(username) : null;
+  });
 }

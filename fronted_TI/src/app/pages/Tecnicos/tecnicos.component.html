@@ -19,7 +19,11 @@
       <span class="count">{{ technicians().length }}</span>
     </div>
 
-    @if (technicians().length) {
+    @if (loading()) {
+      <app-empty-state message="Cargando técnicos…" />
+    } @else if (error()) {
+      <app-empty-state [message]="error()!" />
+    } @else if (technicians().length) {
       @for (t of technicians(); track t.id) {
         <app-team-row [user]="t" />
       }

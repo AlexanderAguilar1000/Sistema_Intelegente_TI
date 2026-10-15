@@ -2,7 +2,7 @@
   <app-user-avatar [name]="user().fullName" [large]="true" />
   <div class="info">
     <p class="name">{{ user().fullName }}</p>
-    <p class="meta">{{ email() }} · {{ user().area }}</p>
+    <p class="meta">{{ email() ? email() + ' · ' : '' }}{{ user().area }}</p>
   </div>
   <span class="badge-tech">Técnico</span>
   <!-- Sin acción por ahora: la edición no está definida en el mockup -->
