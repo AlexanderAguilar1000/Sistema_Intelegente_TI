@@ -1,5 +1,7 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 
+import com.corporativoTI.SistemaInteligenteTI.audit.model.IncidentEventAction;
+import com.corporativoTI.SistemaInteligenteTI.audit.service.AuditService;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
@@ -44,11 +46,13 @@ public class IncidentService {
     private final UserRepository userRepository;
     private final IncidentStateMachine stateMachine;
     private final RoleGuard roleGuard;
+    private final AuditService auditService;
 
     /**
      * Registra un incidente en estado Registrado y pendiente de clasificación. La clasificación
      * con IA se incorpora en T-30; hasta entonces todo incidente nace pendiente.
      */
+    @Transactional
     public IncidentResponse registerIncident(User activeUser, CreateIncidentRequest request) {
         roleGuard.requireSupervisor(activeUser);
         String title = requireText(request.title(), "title");
@@ -62,6 +66,7 @@ public class IncidentService {
         incident.setCreatedBy(activeUser);
         incident.setCreatedAt(Instant.now());
         Incident saved = incidentRepository.save(incident);
+        auditService.record(saved.getId(), IncidentEventAction.CREATED, activeUser);
 
         return toResponse(saved);
     }
@@ -132,11 +137,13 @@ public class IncidentService {
         Incident incident =
                 incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));//encontrar el incidente que se quiere cambiar 
         incident.classifyManually(type, priority, area);
+        auditService.record(id, IncidentEventAction.MANUALLY_CLASSIFIED, activeUser);
         // Si el nuevo área excluye al técnico actual, el incidente vuelve a Registrado sin técnico.
         //Si cambia el area del incidente y el tecnico asignado no pertenece a esa area , se retira la asignacion y se cambia el estado del incidente a registrado
         if (incident.assignmentExcludedByArea()) {
             incident.withdrawAssignment(
                     stateMachine.transition(incident.getStatus(), IncidentAction.UNASSIGN_BY_AREA_CHANGE));
+            auditService.record(id, IncidentEventAction.UNASSIGNED_BY_AREA_CHANGE, activeUser);
         }
         return toDetailResponse(incidentRepository.save(incident));//guarda en la base de datos  y se lo envia al todetailresponse y lo envia al enpoind 
     }
@@ -171,7 +178,13 @@ public class IncidentService {
                         ? IncidentAction.ASSIGN
                         : IncidentAction.REASSIGN;
         IncidentStatus target = stateMachine.transition(incident.getStatus(), action);
-        incident.assignTo(technician, activeUser, target, Instant.now());//asgina el icidente 
+        incident.assignTo(technician, activeUser, target, Instant.now());//asgina el icidente
+        auditService.record(
+                id,
+                action == IncidentAction.ASSIGN
+                        ? IncidentEventAction.ASSIGNED
+                        : IncidentEventAction.REASSIGNED,
+                activeUser);
         return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo devuelve al enpoind 
     }
 
@@ -193,6 +206,7 @@ public class IncidentService {
         //cambia el estado del incidente a empezado
         IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.START);
         incident.start(target, Instant.now());
+        auditService.record(id, IncidentEventAction.STARTED, activeUser);
         return toDetailResponse(incidentRepository.save(incident));
     }
 
@@ -212,7 +226,8 @@ public class IncidentService {
         }
         String solution = requireText(request.solution(), "solution");
         IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.RESOLVE);
-        incident.resolve(solution, target, Instant.now());//llama a este metodo para verificar si cumple con la cantidad minima de caracteres 
+        incident.resolve(solution, target, Instant.now());//llama a este metodo para verificar si cumple con la cantidad minima de caracteres
+        auditService.record(id, IncidentEventAction.RESOLVED, activeUser);
         return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo convierte a to detailresponse para que el backend se lo pase a angular . 
     }
 
@@ -237,6 +252,7 @@ public class IncidentService {
         IncidentStatus target =
                 stateMachine.transition(incident.getStatus(), IncidentAction.CLOSE_WITHOUT_SOLUTION);
         incident.closeWithoutSolution(reason, target, Instant.now());
+        auditService.record(id, IncidentEventAction.CLOSED_WITHOUT_SOLUTION, activeUser);
         return toDetailResponse(incidentRepository.save(incident));
     }
 

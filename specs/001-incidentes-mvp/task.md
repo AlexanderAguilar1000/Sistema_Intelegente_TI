@@ -72,13 +72,13 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-19 · Cerrar un incidente sin solución** — RF-14
   **Hecho cuando:** `POST /api/incidents/{id}/closure` con motivo (duplicado, no reproducible o descartado) pasa a Cerrado sin solución y no exige texto de solución; sin motivo devuelve 422; tests.
 
-- [ ] **T-20 · Bloquear cambios sobre incidentes cerrados** — RF-12, RF-14
+- [x] **T-20 · Bloquear cambios sobre incidentes cerrados** — RF-12, RF-14
   **Hecho cuando:** corregir la clasificación, reasignar, iniciar, resolver o cerrar un incidente ya cerrado devuelve 409 en todos los casos; test parametrizado sobre los dos estados finales.
 
-- [ ] **T-21 · Resolver los choques entre dos acciones simultáneas** — RF-7, RF-12
+- [x] **T-21 · Resolver los choques entre dos acciones simultáneas** — RF-7, RF-12
   **Hecho cuando:** dos asignaciones concurrentes sobre el mismo incidente dejan una sola ganadora y la otra recibe 409; test que simula el conflicto de versión.
 
-- [ ] **T-22 · Dejar traza de quién hace cada cosa** — RNF-6
+- [x] **T-22 · Dejar traza de quién hace cada cosa** — RNF-6
   **Hecho cuando:** un test recorre el ciclo completo (registrar, clasificar a mano, asignar, reasignar, iniciar, resolver) y encuentra en `incident_events` un evento por acción con su usuario y su fecha.
 
 ## Bloque 3 — Servicio de IA

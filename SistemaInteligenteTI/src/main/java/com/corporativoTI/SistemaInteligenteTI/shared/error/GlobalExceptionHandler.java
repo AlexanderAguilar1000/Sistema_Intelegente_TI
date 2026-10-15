@@ -15,6 +15,7 @@ import com.corporativoTI.SistemaInteligenteTI.users.exception.RoleNotAllowedExce
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UnknownActiveUserException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UsernameAlreadyExistsException;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -108,6 +109,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleInvalidTransition(InvalidTransitionException ex) {
         return new ErrorResponse("INVALID_TRANSITION", ex.getMessage());
+    }
+
+    /** Bloqueo optimista (D8): otra acción confirmó un cambio sobre el mismo incidente antes que ésta. */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConcurrentModification(ObjectOptimisticLockingFailureException ex) {
+        return new ErrorResponse(
+                "CONCURRENT_MODIFICATION",
+                "El incidente fue modificado por otra acción al mismo tiempo. Recarga e inténtalo de nuevo.");
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
