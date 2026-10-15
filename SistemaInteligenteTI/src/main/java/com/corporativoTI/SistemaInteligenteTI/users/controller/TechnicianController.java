@@ -30,6 +30,11 @@ public class TechnicianController {
         return technicianService.listTechniciansByArea(activeUser, area);
     }
 
+    @GetMapping("/all")
+    public List<UserResponse> listAllTechnicians(@ActiveUser User activeUser) {
+        return technicianService.listAllTechnicians(activeUser);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse createTechnician(

@@ -183,6 +183,35 @@ class TechnicianControllerTest {
     }
 
     @Test
+    void listsTechniciansOfEveryAreaAndNoSupervisors() throws Exception {
+        saveUser("apps.todos", Role.TECHNICIAN, Area.APPLICATIONS);
+        saveUser("db.todos", Role.TECHNICIAN, Area.DATABASE);
+        saveUser("sec.todos", Role.TECHNICIAN, Area.SECURITY);
+        saveUser("super.todos", Role.SUPERVISOR, null);
+        long technicians = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.TECHNICIAN)
+                .count();
+
+        mockMvc.perform(get("/api/technicians/all").header("X-User-Id", supervisorId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value((int) technicians))
+                .andExpect(jsonPath("$[?(@.fullName == 'Nombre apps.todos')]").isNotEmpty())
+                .andExpect(jsonPath("$[?(@.fullName == 'Nombre db.todos')]").isNotEmpty())
+                .andExpect(jsonPath("$[?(@.fullName == 'Nombre sec.todos')]").isNotEmpty())
+                .andExpect(jsonPath("$[?(@.fullName == 'Nombre super.todos')]").isEmpty())
+                .andExpect(jsonPath("$[?(@.role != 'TECHNICIAN')]").isEmpty());
+    }
+
+    @Test
+    void listingAllTechniciansIsDeniedToTechnicians() throws Exception {
+        User technician = saveUser("tecnico.todos", Role.TECHNICIAN, Area.APPLICATIONS);
+
+        mockMvc.perform(get("/api/technicians/all").header("X-User-Id", technician.getId()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN_ROLE"));
+    }
+
+    @Test
     void rejectsMissingAreaIndicatingTheField() throws Exception {
         postTechnician(
                         """

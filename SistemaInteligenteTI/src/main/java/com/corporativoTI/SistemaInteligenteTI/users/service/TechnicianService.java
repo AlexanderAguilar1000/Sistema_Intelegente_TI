@@ -63,6 +63,15 @@ public class TechnicianService {
                 .toList();
     }
 
+    /** Todos los técnicos sin importar su área; solo el supervisor la consulta (RF-1). */
+    public List<UserResponse> listAllTechnicians(User activeUser) {
+        roleGuard.requireSupervisor(activeUser);
+        return userRepository.findByRoleOrderByFullName(Role.TECHNICIAN).stream()
+                .map(user -> new UserResponse(
+                        user.getId(), user.getFullName(), user.getRole().name(), user.getArea().name()))
+                .toList();
+    }
+
     private static String requireText(String value, String field) {
         if (value == null || value.isBlank()) {
             throw new MissingFieldException(field);
