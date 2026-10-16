@@ -1,6 +1,5 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { User } from '../../models/user.model';
-import { toCorporateEmail } from '../../utils/user.util';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
@@ -12,8 +11,4 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 })
 export class TeamRowComponent {
   user = input.required<User>();
-  email = computed(() => {
-    const username = this.user().username;
-    return username ? toCorporateEmail(username) : null;
-  });
 }

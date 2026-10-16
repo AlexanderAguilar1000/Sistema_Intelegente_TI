@@ -37,7 +37,3 @@ export function getInitials(fullName: string): string {
     .slice(0, 2)
     .toUpperCase();
 }
-
-export function toCorporateEmail(username: string): string {
-  return `${username}@empresa.es`;
-}
