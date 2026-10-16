@@ -1,0 +1,81 @@
+import { Incident, IncidentUser } from '../models/incident.model';
+
+// Datos falsos mientras el frontend no se conecta al backend.
+
+export const MOCK_USERS: IncidentUser[] = [
+  { id: 'u1', fullName: 'Ana García', username: 'ana.garcia', role: 'Supervisor' },
+  { id: 'u2', fullName: 'Carlos Ruiz', username: 'carlos.ruiz', role: 'Técnico', area: 'Infraestructura' },
+  { id: 'u3', fullName: 'María López', username: 'maria.lopez', role: 'Técnico', area: 'Aplicaciones' },
+  { id: 'u4', fullName: 'Pedro Sánchez', username: 'pedro.sanchez', role: 'Técnico', area: 'Infraestructura' },
+];
+
+export const MOCK_INCIDENTS: Incident[] = [
+  {
+    id: 'INC-2024-0412',
+    title: 'Fallo de conectividad en servidor de base de datos',
+    description: 'El servicio de base de datos no responde a las peticiones de las aplicaciones internas.',
+    status: 'En progreso',
+    type: 'Red',
+    priority: 'Alta',
+    area: 'Infraestructura',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-22T08:17:00',
+    assignedTo: 'carlos.ruiz',
+  },
+  {
+    id: 'INC-2024-0411',
+    title: 'Error al generar reporte mensual de ventas',
+    description: 'El reporte se queda cargando y no muestra resultados para el mes actual.',
+    status: 'Asignado',
+    type: 'Bug',
+    priority: 'Alta',
+    area: 'Aplicaciones',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-22T07:52:00',
+    assignedTo: 'maria.lopez',
+  },
+  {
+    id: 'INC-2024-0410',
+    title: 'Usuario bloqueado después de cambio de contraseña',
+    description: 'El usuario no puede acceder al portal corporativo después de actualizar sus credenciales.',
+    status: 'Registrado',
+    type: 'Acceso',
+    priority: 'Media',
+    area: 'Soporte a usuario',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-21T16:40:00',
+  },
+  {
+    id: 'INC-2024-0409',
+    title: 'Lentitud general en aplicación de inventario',
+    description: 'La aplicación tarda más de un minuto en cargar cada pantalla.',
+    status: 'Resuelto',
+    type: 'Rendimiento',
+    priority: 'Media',
+    area: 'Aplicaciones',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-21T14:21:00',
+    assignedTo: 'maria.lopez',
+    resolvedAt: '2024-05-21T18:12:00',
+  },
+  {
+    id: 'INC-2024-0408',
+    title: 'Equipo no enciende después de actualización',
+    description: 'El equipo de recepción no inicia correctamente después de la última actualización.',
+    status: 'Cerrado sin solución',
+    type: 'Hardware',
+    priority: 'Baja',
+    area: 'Soporte a usuario',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-20T11:05:00',
+  },
+  {
+    id: 'INC-2024-0407',
+    title: 'Nueva solicitud sin clasificación',
+    description: 'El usuario reporta un problema que requiere revisión del equipo de soporte.',
+    status: 'Registrado',
+    createdBy: 'ana.garcia',
+    createdAt: '2024-05-20T10:14:00',
+    pendingClassification: true,
+  },
+];

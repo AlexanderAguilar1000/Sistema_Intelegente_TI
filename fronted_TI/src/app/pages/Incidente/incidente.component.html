@@ -1,1 +1,23 @@
-<p>incidente works!</p>
+<div class="page-wrap">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Centro de operaciones</p>
+      <h1>Incidentes</h1>
+      <p class="subtitle">Supervisa y gestiona las incidencias de soporte de TI.</p>
+    </div>
+    <a class="btn-primary" routerLink="/incidentes/nuevo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Nuevo incidente
+    </a>
+  </header>
+
+  <section class="stats-grid" aria-label="Indicadores">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-stat-card [kpi]="kpi" [period]="period" />
+    }
+  </section>
+
+  <app-incident-table [incidents]="incidents()" [users]="users()" (open)="openIncident($event)" />
+</div>

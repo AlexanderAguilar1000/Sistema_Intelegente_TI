@@ -1,0 +1,5 @@
+@if (priority()) {
+  <span [class]="'badge ' + cssClass()">{{ priority() }}</span>
+} @else {
+  <span class="none">—</span>
+}

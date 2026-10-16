@@ -1,0 +1,6 @@
+.badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.registered { background: #edf1f5; color: #5d6878; }
+.assigned { background: #eaf2ff; color: #236bd2; }
+.in-progress { background: #fff2d9; color: #9b6100; }
+.resolved { background: #e2f6e9; color: #167847; }
+.closed { background: #f5e8ed; color: #a34d6a; }
