@@ -30,9 +30,13 @@
           </select>
         </label>
 
+        @if (submitError()) {
+          <small class="error">{{ submitError() }}</small>
+        }
+
         <div class="footer">
           <button type="button" class="btn btn-outline" (click)="close()">Cancelar</button>
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Crear técnico</button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">{{ saving() ? 'Creando…' : 'Crear técnico' }}</button>
         </div>
       </form>
     </div>

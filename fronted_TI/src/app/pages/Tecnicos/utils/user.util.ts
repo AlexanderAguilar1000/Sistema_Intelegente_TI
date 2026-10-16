@@ -8,6 +8,15 @@ const AREA_LABEL: Record<string, string> = {
   USER_SUPPORT: 'Soporte a usuario',
 };
 
+const AREA_CODE: Record<string, string> = Object.fromEntries(
+  Object.entries(AREA_LABEL).map(([code, label]) => [label, code]),
+);
+
+/** "Infraestructura" -> "INFRASTRUCTURE" (valor que espera el backend). */
+export function toAreaCode(label: string): string {
+  return AREA_CODE[label] ?? label;
+}
+
 export function toTechnician(dto: TechnicianApiResponse): User {
   return {
     id: dto.id,

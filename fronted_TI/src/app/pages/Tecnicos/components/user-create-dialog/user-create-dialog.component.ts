@@ -1,6 +1,7 @@
-import { Component, HostListener, inject, input, output } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, HostListener, inject, input, output, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { NewTechnician, TechArea } from '../../models/user.model';
+import { TechArea } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
 import { AREAS } from '../../utils/areas.util';
 import { USERNAME_PATTERN } from '../../utils/user.util';
@@ -17,7 +18,9 @@ export class UserCreateDialogComponent {
 
   open = input(false);
   closed = output<void>();
-  created = output<NewTechnician>();
+  created = output<void>();
+  saving = signal(false);
+  submitError = signal<string | null>(null);
 
   readonly areas = AREAS;
 
@@ -46,13 +49,25 @@ export class UserCreateDialogComponent {
   }
 
   submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     const { fullName, username, area } = this.form.getRawValue();
-    this.created.emit({ fullName, username, area: area as TechArea });
-    this.form.reset();
+    this.saving.set(true);
+    this.submitError.set(null);
+    this.users.createTechnician({ fullName, username, area: area as TechArea }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.form.reset();
+        this.created.emit();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.submitError.set(err.error?.message ?? 'No se pudo crear el técnico.');
+      },
+    });
   }
 
   close() {
+    this.submitError.set(null);
     this.form.reset();
     this.closed.emit();
   }

@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { NewTechnician, TechnicianApiResponse, User } from '../models/user.model';
-import { toTechnician } from '../utils/user.util';
+import { Observable, map, tap } from 'rxjs';
+import { CreateTechnicianRequest, NewTechnician, TechnicianApiResponse, User } from '../models/user.model';
+import { toAreaCode, toTechnician } from '../utils/user.util';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -31,15 +32,15 @@ export class UserService {
     return this.technicians().some((u) => u.username?.toLowerCase() === value);
   }
 
-  // El alta todavía no está conectada al backend (POST /api/technicians): solo agrega en memoria.
-  addTechnician(data: NewTechnician): void {
-    const technician: User = {
-      id: Date.now(),
+  createTechnician(data: NewTechnician): Observable<User> {
+    const body: CreateTechnicianRequest = {
       fullName: data.fullName.trim(),
       username: data.username.trim().toLowerCase(),
-      role: 'Técnico',
-      area: data.area,
+      area: toAreaCode(data.area),
     };
-    this.technicians.update((list) => [...list, technician]);
+    return this.http.post<TechnicianApiResponse>('/api/technicians', body).pipe(
+      map((dto) => ({ ...toTechnician(dto), username: body.username })),
+      tap((technician) => this.technicians.update((list) => [...list, technician])),
+    );
   }
 }

@@ -29,3 +29,10 @@ export interface NewTechnician {
   username: string;
   area: TechArea;
 }
+
+/** Cuerpo de POST /api/technicians */
+export interface CreateTechnicianRequest {
+  fullName: string;
+  username: string;
+  area: string;
+}

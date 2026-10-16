@@ -3,7 +3,6 @@ import { AuthService } from '../Usuarios/services/auth.service';
 import { EmptyStateComponent } from './components/empty-state/empty-state.component';
 import { TeamRowComponent } from './components/team-row/team-row.component';
 import { UserCreateDialogComponent } from './components/user-create-dialog/user-create-dialog.component';
-import { NewTechnician } from './models/user.model';
 import { UserService } from './services/user.service';
 
 @Component({
@@ -29,8 +28,7 @@ export class TecnicosComponent {
     });
   }
 
-  onCreated(data: NewTechnician) {
-    this.users.addTechnician(data);
+  onCreated() {
     this.createOpen.set(false);
   }
 }
