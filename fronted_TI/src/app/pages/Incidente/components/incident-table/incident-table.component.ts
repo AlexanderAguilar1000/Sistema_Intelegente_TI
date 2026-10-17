@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, input, output, signal } from '@angular/core';
-import { Incident, IncidentStatus, IncidentUser, Priority, PriorityFilter, StatusFilter } from '../../models/incident.model';
+import { Incident, IncidentStatus, Priority, PriorityFilter, StatusFilter } from '../../models/incident.model';
 import { PRIORITIES, STATUSES, filterIncidents } from '../../utils/incident.util';
 import { PriorityBadgeComponent } from '../priority-badge/priority-badge.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
@@ -14,7 +14,8 @@ import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 })
 export class IncidentTableComponent {
   incidents = input.required<Incident[]>();
-  users = input<IncidentUser[]>([]);
+  loading = input(false);
+  error = input<string | null>(null);
   open = output<Incident>();
 
   readonly statuses: IncidentStatus[] = STATUSES;
@@ -25,12 +26,6 @@ export class IncidentTableComponent {
   priority = signal<PriorityFilter>('all');
 
   filtered = computed(() => filterIncidents(this.incidents(), this.search(), this.status(), this.priority()));
-
-  private fullNameByUsername = computed(() => new Map(this.users().map((u) => [u.username, u.fullName])));
-
-  technicianName(username?: string): string {
-    return (username && this.fullNameByUsername().get(username)) || '—';
-  }
 
   clearFilters(): void {
     this.search.set('');

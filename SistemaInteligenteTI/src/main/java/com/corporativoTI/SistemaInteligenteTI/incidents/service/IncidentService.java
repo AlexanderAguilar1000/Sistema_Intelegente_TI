@@ -296,8 +296,12 @@ public class IncidentService {
                 incident.getDescription(),
                 incident.getStatus().name(),
                 incident.getClassificationStatus().name(),
+                incident.getType() == null ? null : incident.getType().name(),
                 incident.getPriority() == null ? null : incident.getPriority().name(),
+                incident.getArea() == null ? null : incident.getArea().name(),
                 incident.getCreatedBy().getId(),
+                incident.getAssignedTo() == null ? null : incident.getAssignedTo().getId(),
+                incident.getAssignedTo() == null ? null : incident.getAssignedTo().getFullName(),
                 incident.getCreatedAt());
     }
 

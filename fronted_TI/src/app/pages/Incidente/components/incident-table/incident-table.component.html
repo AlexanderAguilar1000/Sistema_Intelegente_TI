@@ -49,7 +49,11 @@
     </div>
   </div>
 
-  @if (filtered().length) {
+  @if (loading()) {
+    <div class="empty-state"><p>Cargando incidentes…</p></div>
+  } @else if (error()) {
+    <div class="empty-state"><p>{{ error() }}</p></div>
+  } @else if (filtered().length) {
     <div class="table-wrap">
       <table>
         <thead>
@@ -83,7 +87,7 @@
                   </span>
                   <div class="incident-text">
                     <p class="incident-title" [title]="incident.title">{{ incident.title }}</p>
-                    <p class="incident-id">{{ incident.id }}</p>
+                    <p class="incident-id">{{ incident.code }}</p>
                   </div>
                 </div>
               </td>
@@ -97,7 +101,7 @@
               </td>
               <td><app-priority-badge [priority]="incident.priority" /></td>
               <td>{{ incident.area ?? 'Sin asignar' }}</td>
-              <td>{{ technicianName(incident.assignedTo) }}</td>
+              <td>{{ incident.assignedToName ?? '—' }}</td>
               <td class="muted">{{ incident.createdAt | date: 'dd/MM/yyyy' }}</td>
               <td class="chevron-col">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

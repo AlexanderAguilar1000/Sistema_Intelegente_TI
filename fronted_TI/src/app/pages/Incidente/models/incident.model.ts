@@ -3,33 +3,45 @@ export type IncidentType = 'Bug' | 'Rendimiento' | 'Acceso' | 'Hardware' | 'Red'
 export type TechArea = 'Infraestructura' | 'Aplicaciones' | 'Base de datos' | 'Seguridad' | 'Soporte a usuario';
 export type IncidentStatus = 'Registrado' | 'Asignado' | 'En progreso' | 'Resuelto' | 'Cerrado sin solución';
 
+/** Forma de cada incidente en GET /api/incidents (enums como códigos del backend). */
+export interface IncidentApiResponse {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  classificationStatus: string;
+  type: string | null;
+  priority: string | null;
+  area: string | null;
+  createdBy: number;
+  assignedTo: number | null;
+  assignedToName: string | null;
+  createdAt: string;
+}
+
+/** Cuerpo de GET /api/incidents. */
+export interface IncidentListApiResponse {
+  incidents: IncidentApiResponse[];
+  empty: boolean;
+  message: string | null;
+}
+
+/** Incidente listo para la vista (etiquetas en español). */
 export interface Incident {
-  /** Formato INC-AAAA-NNNN */
-  id: string;
+  id: number;
+  /** Código visible, formato INC-AAAA-NNNN. */
+  code: string;
   title: string;
   description: string;
   status: IncidentStatus;
   type?: IncidentType;
   priority?: Priority;
   area?: TechArea;
-  /** username del supervisor que lo registró */
-  createdBy: string;
   /** Fecha ISO */
   createdAt: string;
-  /** username del técnico asignado */
-  assignedTo?: string;
-  resolvedAt?: string;
+  assignedToName?: string;
   /** Sin tipo/prioridad/área todavía */
-  pendingClassification?: boolean;
-}
-
-/** Técnico o supervisor, para resolver el nombre completo por username. */
-export interface IncidentUser {
-  id: string;
-  fullName: string;
-  username: string;
-  role: 'Supervisor' | 'Técnico';
-  area?: TechArea;
+  pendingClassification: boolean;
 }
 
 export interface IncidentKpi {

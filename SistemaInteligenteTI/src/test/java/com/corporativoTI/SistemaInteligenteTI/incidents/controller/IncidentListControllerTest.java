@@ -1,13 +1,17 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.controller;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.IncidentType;
+import com.corporativoTI.SistemaInteligenteTI.catalog.model.Priority;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.IncidentStatus;
@@ -119,6 +123,47 @@ class IncidentListControllerTest {
         createIncident("T11 de B", technicianB);
 
         listAs(technicianA).andExpect(status().isOk()).andExpect(jsonPath("$.incidents", hasSize(0)));
+    }
+
+    @Test
+    void listExposesTypeAreaAndAssignedTechnicianWhenPresent() throws Exception {
+        Incident incident = createIncident("T11 clasificado", technicianA);
+        incident.setClassificationStatus(ClassificationStatus.MANUALLY_CORRECTED);
+        incident.setType(IncidentType.NETWORK);
+        incident.setPriority(Priority.HIGH);
+        incident.setArea(Area.APPLICATIONS);
+        incidentRepository.save(incident);
+
+        listAs(supervisor)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].type").value("NETWORK"))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].area")
+                                .value("APPLICATIONS"))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].assignedTo")
+                                .value(technicianA.getId().intValue()))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].assignedToName")
+                                .value(technicianA.getFullName()));
+    }
+
+    @Test
+    void listReturnsNullTypeAreaAndTechnicianForPendingUnassignedIncident() throws Exception {
+        Incident incident = createIncident("T11 pendiente", null);
+
+        listAs(supervisor)
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].type").value(hasItem(nullValue())))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].area").value(hasItem(nullValue())))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].assignedTo")
+                                .value(hasItem(nullValue())))
+                .andExpect(
+                        jsonPath("$.incidents[?(@.id == " + incident.getId() + ")].assignedToName")
+                                .value(hasItem(nullValue())));
     }
 
     @Test

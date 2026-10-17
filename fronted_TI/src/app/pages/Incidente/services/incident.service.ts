@@ -1,20 +1,29 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { Incident, IncidentUser } from '../models/incident.model';
-import { sortByCreatedDesc } from '../utils/incident.util';
-import { MOCK_INCIDENTS, MOCK_USERS } from './incident.mock';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Incident, IncidentListApiResponse } from '../models/incident.model';
+import { toIncident } from '../utils/incident-api.util';
 
-/** Incidentes con datos falsos; se sustituirá por llamadas a /api/incidents. */
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
-  readonly incidents = signal<Incident[]>(sortByCreatedDesc(MOCK_INCIDENTS));
-  readonly users = signal<IncidentUser[]>(MOCK_USERS);
+  private http = inject(HttpClient);
 
-  private readonly fullNameByUsername = computed(
-    () => new Map(this.users().map((u) => [u.username, u.fullName])),
-  );
+  readonly incidents = signal<Incident[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
-  /** Nombre completo del técnico o undefined si no está asignado / no existe. */
-  technicianName(username?: string): string | undefined {
-    return username ? this.fullNameByUsername().get(username) : undefined;
+  /** GET /api/incidents: el backend ya devuelve los incidentes ordenados por creación descendente. */
+  loadIncidents(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.http.get<IncidentListApiResponse>('/api/incidents').subscribe({
+      next: (res) => {
+        this.incidents.set(res.incidents.map(toIncident));
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('No se pudo cargar la lista de incidentes.');
+        this.loading.set(false);
+      },
+    });
   }
 }

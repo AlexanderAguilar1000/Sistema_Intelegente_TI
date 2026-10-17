@@ -19,5 +19,5 @@
     }
   </section>
 
-  <app-incident-table [incidents]="incidents()" [users]="users()" (open)="openIncident($event)" />
+  <app-incident-table [incidents]="incidents()" [loading]="loading()" [error]="error()" (open)="openIncident($event)" />
 </div>
