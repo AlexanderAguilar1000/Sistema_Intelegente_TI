@@ -1,0 +1,82 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="incident-create-title" (click)="$event.stopPropagation()">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Nuevo registro</p>
+          <h2 id="incident-create-title">Registrar incidente</h2>
+          <p class="subtitle">Describe el problema para que podamos ayudarte.</p>
+        </div>
+        <button type="button" class="close" aria-label="Cerrar" (click)="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="body">
+        @if (createdIncident(); as incident) {
+          <div class="success" role="status">
+            <strong>Incidente registrado correctamente</strong>
+            @if (incident.pendingClassification) {
+              <span>Se ha creado el incidente {{ incident.code }}, pendiente de clasificación.</span>
+            } @else {
+              <span>Se ha creado el incidente {{ incident.code }} y fue clasificado por IA.</span>
+            }
+          </div>
+          <div class="success-actions">
+            <button type="button" class="btn-submit" (click)="close()">Cerrar</button>
+          </div>
+        } @else {
+          <section class="card">
+            <div class="card-header">
+              <h3>Detalles del incidente</h3>
+              <p>La IA clasificará automáticamente el tipo, prioridad y área responsable.</p>
+            </div>
+
+            <form class="card-content" [formGroup]="form" (ngSubmit)="submit()">
+              <label>
+                <span>Título <b class="required">*</b></span>
+                <input type="text" formControlName="title" placeholder="Ej.: Error 500 al intentar generar reporte de ventas" />
+                @if (showError('title')) {
+                  <small class="error">El título es obligatorio.</small>
+                }
+              </label>
+
+              <label>
+                <span>Descripción <b class="required">*</b></span>
+                <textarea
+                  formControlName="description"
+                  rows="5"
+                  placeholder="Explica el problema con el mayor detalle posible. No escribas contraseñas ni datos sensibles."
+                ></textarea>
+                @if (showError('description')) {
+                  <small class="error">La descripción es obligatoria.</small>
+                }
+              </label>
+
+              <p class="warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                  <path d="M12 9v4M12 17h.01" />
+                </svg>
+                No incluyas contraseñas, tokens ni información sensible.
+              </p>
+
+              @if (submitError()) {
+                <small class="error">{{ submitError() }}</small>
+              }
+
+              <button type="submit" class="btn-submit" [disabled]="saving()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9.9 4.2 11 8l3.8 1.1L11 10.2 9.9 14l-1.1-3.8L5 9.1l3.8-1.1zM18 14l.6 2.1 2.1.6-2.1.6L18 19.4l-.6-2.1-2.1-.6 2.1-.6zM17 3l.5 1.5L19 5l-1.5.5L17 7l-.5-1.5L15 5l1.5-.5z" />
+                </svg>
+                {{ saving() ? 'Clasificando…' : 'Registrar y clasificar con IA' }}
+              </button>
+            </form>
+          </section>
+        }
+      </div>
+    </div>
+  </div>
+}

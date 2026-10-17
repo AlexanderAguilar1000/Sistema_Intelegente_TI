@@ -5,12 +5,12 @@
       <h1>Incidentes</h1>
       <p class="subtitle">Supervisa y gestiona las incidencias de soporte de TI.</p>
     </div>
-    <a class="btn-primary" routerLink="/incidentes/nuevo">
+    <button type="button" class="btn-primary" (click)="createOpen.set(true)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14" />
       </svg>
       Nuevo incidente
-    </a>
+    </button>
   </header>
 
   <section class="stats-grid" aria-label="Indicadores">
@@ -18,6 +18,8 @@
       <app-stat-card [kpi]="kpi" [period]="period" />
     }
   </section>
+
+  <app-incident-create-dialog [open]="createOpen()" (closed)="createOpen.set(false)" />
 
   <app-incident-table [incidents]="incidents()" [loading]="loading()" [error]="error()" (open)="openIncident($event)" />
 </div>
