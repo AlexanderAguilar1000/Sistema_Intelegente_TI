@@ -6,7 +6,7 @@ import { UserRole } from '../../models/user.model';
   standalone: true,
   template: `<span class="badge" [class.supervisor]="role() === 'Supervisor'" [class.tech]="role() === 'Técnico'">{{ role() }}</span>`,
   styles: `
-    .badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+    .badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; font-size: 13px; font-weight: 500; }
     .supervisor { background: #eae3ff; color: #6b43b3; }
     .tech { background: #e1f5f1; color: #187c72; }
   `

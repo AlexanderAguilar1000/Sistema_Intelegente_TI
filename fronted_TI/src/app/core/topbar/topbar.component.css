@@ -12,7 +12,7 @@
   border-bottom: 1px solid #e3e8ef;
 }
 
-.topbar-context { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.topbar-context { display: flex; align-items: center; gap: 8px; font-size: 15px; }
 .crumb { color: #1d2733; }
 .crumb.current { color: #637083; }
 .crumb-sep { width: 15px; height: 15px; color: #8a96a7; }
@@ -71,19 +71,19 @@ button { font: inherit; cursor: pointer; }
   background: #e0edff;
   color: #1b61cf;
   border: 1px solid #c6dcfd;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 .user-text { display: flex; flex-direction: column; line-height: 1.25; }
-.user-name { font-size: 13px; font-weight: 600; color: #1d2733; }
-.user-role { font-size: 11px; color: #637083; }
+.user-name { font-size: 14px; font-weight: 600; color: #1d2733; }
+.user-role { font-size: 13px; color: #637083; }
 .chevron { width: 15px; height: 15px; color: #8a96a7; }
 
 @media (max-width: 1100px) { .topbar { padding: 0 22px; } }
 @media (max-width: 760px) {
   .topbar { height: 62px; padding: 0 16px; justify-content: flex-start; }
   .mobile-menu { display: grid; }
-  .topbar-context { font-size: 12px; }
+  .topbar-context { font-size: 14px; }
   .crumb.current, .crumb-sep { display: none; }
 }
 @media (max-width: 640px) {

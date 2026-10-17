@@ -7,8 +7,8 @@
 .amber { background: #fff2d9; color: #d98a00; }
 .green { background: #e2f6e9; color: #1e9a5a; }
 .red { background: #ffe5e3; color: #e0453f; }
-.period { color: #5d6878; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.label { margin: 14px 0 6px; color: #5a6675; font-size: 14px; }
+.period { color: #5d6878; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.label { margin: 14px 0 6px; color: #5a6675; font-size: 15px; }
 .bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
-.value { color: #1d2733; font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
-.helper { color: #637083; font-size: 11px; }
+.value { color: #1d2733; font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.helper { color: #637083; font-size: 13px; }

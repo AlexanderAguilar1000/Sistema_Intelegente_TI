@@ -1,5 +1,5 @@
-.badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.badge { display: inline-block; padding: 3px 7px; border-radius: 5px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .high { background: #ffe5e3; color: #c53e39; }
 .medium { background: #fff0d6; color: #a96600; }
 .low { background: #e5f6eb; color: #218250; }
-.none { color: #637083; font-size: 12px; }
+.none { color: #637083; font-size: 14px; }
