@@ -123,19 +123,19 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 ## Bloque 5 — Frontend Angular
 
-- [ ] **T-35 · Elegir con qué usuario se trabaja** — RF-1
+- [x] **T-35 · Elegir con qué usuario se trabaja** — RF-1
   **Hecho cuando:** en el navegador se puede seleccionar un usuario de la lista, el menú cambia según su rol, y todas las peticiones salen con su `X-User-Id`; cambiar de usuario actualiza lo que se ve sin recargar.
 
 - [ ] **T-36 · Ver y filtrar los incidentes** — RF-8
   **Hecho cuando:** el supervisor ve todos los incidentes y el técnico solo los suyos, el filtro por prioridad funciona en pantalla y una lista sin resultados muestra el aviso correspondiente.
 
-- [ ] **T-37 · Registrar un incidente desde la interfaz** — RF-3, RNF-4
+- [x] **T-37 · Registrar un incidente desde la interfaz** — RF-3, RNF-4
   **Hecho cuando:** el formulario crea el incidente y muestra su clasificación, o el aviso de pendiente si la IA no respondió; el formulario advierte de no escribir contraseñas.
 
 - [ ] **T-38 · Abrir el detalle de un incidente** — RF-9
   **Hecho cuando:** el detalle muestra todos los datos del incidente, y el supervisor lo ve sin el botón "Analizar con IA".
 
-- [ ] **T-39 · Dar de alta un técnico desde la interfaz** — RF-2
+- [x] **T-39 · Dar de alta un técnico desde la interfaz** — RF-2
   **Hecho cuando:** el supervisor crea un técnico eligiendo su área y ese técnico aparece después en el desplegable de asignación de esa área.
 
 - [ ] **T-40 · Corregir la clasificación desde la interfaz** — RF-4, RF-6

@@ -44,13 +44,39 @@ export interface Incident {
   pendingClassification: boolean;
 }
 
-/** Detalle de un incidente (vista S2). Datos que el listado no trae. */
+/** Cuerpo de GET /api/incidents/{id} (enums como códigos del backend). */
+export interface IncidentDetailApiResponse {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  classificationStatus: string;
+  type: string | null;
+  priority: string | null;
+  area: string | null;
+  createdBy: number;
+  assignedTo: number | null;
+  assignedBy: number | null;
+  solution: string | null;
+  closureReason: string | null;
+  createdAt: string;
+  assignedAt: string | null;
+  startedAt: string | null;
+  closedAt: string | null;
+}
+
+/** Detalle de un incidente (vista S2). El backend envía ids de usuario, no nombres. */
 export interface IncidentDetail extends Incident {
-  createdBy: string;
-  /** "Clasificado por IA" | "Corregida manualmente"; vacío si está pendiente. */
+  createdBy: number;
+  assignedTo?: number;
+  assignedBy?: number;
+  /** "Clasificado por IA" | "Corregida manualmente"; sin valor si está pendiente. */
   classificationSource?: string;
-  /** Resuelto pero aún sin indexar en la base de conocimiento. */
-  unindexed: boolean;
+  solution?: string;
+  closureReason?: string;
+  assignedAt?: string;
+  startedAt?: string;
+  closedAt?: string;
 }
 
 export interface IncidentKpi {
