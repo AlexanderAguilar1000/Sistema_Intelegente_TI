@@ -1,0 +1,14 @@
+:host { display: block; }
+.card { background: #fff; border: 1px solid #dfe7f1; border-radius: 16px; box-shadow: 0 2px 10px #1d273308; }
+.card-header { padding: 22px 24px; border-bottom: 1px solid #e3e9f1; }
+.card-header h2 { margin: 0; font-size: 16px; font-weight: 600; color: #1d2733; }
+.card-body { padding: 24px; display: flex; flex-direction: column; gap: 22px; }
+.field-label { margin: 0 0 10px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #637083; }
+.description { margin: 0; font-size: 15px; line-height: 1.55; color: #2b3745; }
+hr { width: 100%; border: 0; border-top: 2px solid #e3e9f1; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid #dfe7f1; border-radius: 999px; font-size: 14px; color: #2b3745; background: #fff; }
+.chip svg { width: 14px; height: 14px; }
+.source { margin: 12px 0 0; font-size: 13px; color: #637083; }
+.amber-notice { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; background: #fff2d9; color: #a86600; font-size: 13px; }
+.amber-notice svg { width: 16px; height: 16px; flex: none; }

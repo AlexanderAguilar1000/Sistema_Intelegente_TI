@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
-import { Incident, IncidentApiResponse, IncidentListApiResponse } from '../models/incident.model';
+import { Observable, delay, map, of, tap } from 'rxjs';
+import { Incident, IncidentApiResponse, IncidentDetail, IncidentListApiResponse } from '../models/incident.model';
 import { toIncident } from '../utils/incident-api.util';
+import { findMockIncident } from '../utils/incident-detail.mock';
 
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
@@ -34,5 +35,17 @@ export class IncidentService {
         this.loading.set(false);
       },
     });
+  }
+
+  /**
+   * Detalle de un incidente. TODO: reemplazar por GET /api/incidents/{id}.
+   * Por ahora usa datos falsos; si el id no está, cae al incidente del listado cargado.
+   */
+  getDetail(id: number): Observable<IncidentDetail | null> {
+    const mock = findMockIncident(id);
+    const fromList = this.incidents().find((i) => i.id === id);
+    const detail: IncidentDetail | null =
+      mock ?? (fromList ? { ...fromList, createdBy: 'Ana García', unindexed: false } : null);
+    return of(detail).pipe(delay(250));
   }
 }

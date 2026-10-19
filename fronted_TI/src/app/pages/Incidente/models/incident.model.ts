@@ -44,6 +44,15 @@ export interface Incident {
   pendingClassification: boolean;
 }
 
+/** Detalle de un incidente (vista S2). Datos que el listado no trae. */
+export interface IncidentDetail extends Incident {
+  createdBy: string;
+  /** "Clasificado por IA" | "Corregida manualmente"; vacío si está pendiente. */
+  classificationSource?: string;
+  /** Resuelto pero aún sin indexar en la base de conocimiento. */
+  unindexed: boolean;
+}
+
 export interface IncidentKpi {
   label: string;
   value: string;

@@ -1,0 +1,87 @@
+<div class="page-wrap">
+  <a class="back-link" routerLink="/incidentes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m12 19-7-7 7-7M19 12H5" />
+    </svg>
+    Volver a incidentes
+  </a>
+
+  @if (incident(); as inc) {
+    <header class="page-heading">
+      <div class="heading-text">
+        <div class="id-row">
+          <span class="incident-id">{{ inc.code }}</span>
+          <app-status-badge [status]="inc.status" />
+        </div>
+        <h1>{{ inc.title }}</h1>
+        <p class="subtitle">
+          Creado el {{ inc.createdAt | date: 'dd/MM/yyyy HH:mm' }} por {{ inc.createdBy }} ·
+          {{ inc.assignedToName ? 'Asignado a ' + inc.assignedToName : 'Sin técnico asignado' }}
+        </p>
+      </div>
+
+      @if (canEdit()) {
+        <div class="actions">
+          @if (canRetry()) {
+            <button type="button" class="btn-outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
+              </svg>
+              Reintentar clasificación IA
+            </button>
+          }
+          <button type="button" class="btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+              <path d="m15 5 4 4" />
+            </svg>
+            Corregir clasificación
+          </button>
+          <button type="button" class="btn-primary" [disabled]="assignDisabled()" [title]="assignDisabled() ? 'Clasifica el incidente antes de asignar' : ''">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m16 11 2 2 4-4" />
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+            </svg>
+            {{ isReassign() ? 'Reasignar' : 'Asignar' }}
+          </button>
+        </div>
+      }
+    </header>
+
+    <div class="detail-grid">
+      <div class="left-col">
+        <app-incident-summary [incident]="inc" />
+
+        @if (canReindex()) {
+          <button type="button" class="btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+              <path d="M8 16H3v5" />
+            </svg>
+            Relanzar indexación
+          </button>
+        }
+      </div>
+
+      <section class="card">
+        <div class="card-header"><h2>Acciones del supervisor</h2></div>
+        <div class="card-body">
+          <p class="info">
+            Puedes corregir la clasificación, asignar al técnico del área responsable y relanzar la indexación. El estado cambia
+            automáticamente por las acciones del técnico.
+          </p>
+        </div>
+      </section>
+    </div>
+  } @else if (incident() === null) {
+    <div class="empty-state"><p>No se encontró el incidente solicitado.</p></div>
+  } @else {
+    <div class="empty-state"><p>Cargando incidente…</p></div>
+  }
+</div>
