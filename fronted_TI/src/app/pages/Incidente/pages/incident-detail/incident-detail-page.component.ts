@@ -5,14 +5,16 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { UsuariosService } from '../../../Usuarios/services/user.service';
+import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
+import { IncidentDetail } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { IncidentService } from '../../services/incident.service';
 
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })
@@ -22,12 +24,18 @@ export class IncidentDetailPageComponent {
   private usuarios = inject(UsuariosService);
 
   error = signal<string | null>(null);
+  classificationOpen = signal(false);
+  /** Detalle devuelto por el PATCH de clasificación; tiene prioridad sobre el cargado hasta cambiar de ruta. */
+  private updated = signal<IncidentDetail | null>(null);
 
   /** undefined = cargando · null = no se pudo obtener (ver `error`). */
-  incident = toSignal(
+  private loaded = toSignal(
     this.route.paramMap.pipe(
       map((params) => Number(params.get('id'))),
-      tap(() => this.error.set(null)),
+      tap(() => {
+        this.error.set(null);
+        this.updated.set(null);
+      }),
       switchMap((id) =>
         this.service.getDetail(id).pipe(
           catchError((err: HttpErrorResponse) => {
@@ -38,6 +46,8 @@ export class IncidentDetailPageComponent {
       ),
     ),
   );
+
+  incident = computed(() => this.updated() ?? this.loaded());
 
   constructor() {
     // El detalle trae ids de usuario; los nombres salen de GET /api/users.
@@ -50,6 +60,11 @@ export class IncidentDetailPageComponent {
     return id == null ? undefined : this.userName(id);
   });
 
+  assignedToArea = computed(() => {
+    const id = this.incident()?.assignedTo;
+    return id == null ? undefined : this.usuarios.users().find((u) => u.id === id)?.area;
+  });
+
   /** Resuelto o Cerrado sin solución: solo lectura. */
   isFinal = computed(() => {
     const status = this.incident()?.status;
@@ -60,6 +75,10 @@ export class IncidentDetailPageComponent {
   isReassign = computed(() => !!this.incident()?.assignedTo);
   /** Asignar exige clasificación previa. */
   assignDisabled = computed(() => !this.isReassign() && (!!this.incident()?.pendingClassification || !this.incident()?.area));
+
+  onClassificationSaved(detail: IncidentDetail): void {
+    this.updated.set(detail);
+  }
 
   private userName(id: number | undefined): string {
     if (id == null) return '—';

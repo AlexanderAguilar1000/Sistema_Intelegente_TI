@@ -40,6 +40,15 @@ const AREA_LABEL: Record<string, TechArea> = {
   USER_SUPPORT: 'Soporte a usuario',
 };
 
+/** Etiqueta en español -> código de catálogo del backend (inverso de los mapas anteriores). */
+function invert<T extends string>(labels: Record<string, T>): Record<T, string> {
+  return Object.fromEntries(Object.entries(labels).map(([code, label]) => [label, code])) as Record<T, string>;
+}
+
+export const TYPE_CODE = invert(TYPE_LABEL);
+export const PRIORITY_CODE = invert(PRIORITY_LABEL);
+export const AREA_CODE = invert(AREA_LABEL);
+
 /** 412 + 2024 -> "INC-2024-0412". */
 export function toIncidentCode(id: number, createdAt: string): string {
   const year = new Date(createdAt).getFullYear();

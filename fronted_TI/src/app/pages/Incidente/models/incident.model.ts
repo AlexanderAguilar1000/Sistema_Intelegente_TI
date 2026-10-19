@@ -79,6 +79,24 @@ export interface IncidentDetail extends Incident {
   closedAt?: string;
 }
 
+/** Cuerpo de PATCH /api/incidents/{id}/classification (códigos de catálogo del backend). */
+export interface ClassifyIncidentBody {
+  type: string;
+  priority: string;
+  area: string;
+}
+
+/** Valores elegidos en el diálogo "Corregir clasificación" (etiquetas en español). */
+export interface ClassificationValues {
+  type: IncidentType;
+  priority: Priority;
+  area: TechArea;
+}
+
+export const INCIDENT_TYPES: IncidentType[] = ['Bug', 'Rendimiento', 'Acceso', 'Hardware', 'Red', 'Configuración'];
+export const PRIORITIES: Priority[] = ['Alta', 'Media', 'Baja'];
+export const TECH_AREAS: TechArea[] = ['Infraestructura', 'Aplicaciones', 'Base de datos', 'Seguridad', 'Soporte a usuario'];
+
 export interface IncidentKpi {
   label: string;
   value: string;

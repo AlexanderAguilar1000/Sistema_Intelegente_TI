@@ -1,0 +1,76 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="classification-title" (click)="$event.stopPropagation()">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <header class="header">
+          <div>
+            <h2 id="classification-title">Corregir clasificación</h2>
+            <p class="subtitle">Actualiza los datos antes de asignar el incidente.</p>
+          </div>
+          <button type="button" class="close" aria-label="Cerrar" (click)="close()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="body">
+          <label>
+            <span>Tipo</span>
+            <select formControlName="type">
+              <option value="" disabled>Selecciona un tipo</option>
+              @for (t of types; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Prioridad</span>
+            <select formControlName="priority">
+              <option value="" disabled>Selecciona una prioridad</option>
+              @for (p of priorities; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Área responsable</span>
+            <select formControlName="area">
+              <option value="" disabled>Selecciona un área</option>
+              @for (a of areas; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </label>
+
+          @if (willUnassign()) {
+            <div class="notice" role="alert">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                <path d="M12 9v4M12 17h.01" />
+              </svg>
+              <p>
+                <strong>Se retirará la asignación.</strong>
+                {{ assignedTechName() }} pertenece a {{ assignedTechArea() }}, no a {{ form.controls.area.value }}. Al guardar, el
+                incidente quedará sin técnico y volverá al estado Registrado.
+              </p>
+            </div>
+          }
+
+          @if (submitError()) {
+            <small class="error" role="alert">{{ submitError() }}</small>
+          }
+        </div>
+
+        <footer class="footer">
+          <button type="button" class="btn-outline" (click)="close()" [disabled]="saving()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Guardando…' : 'Guardar clasificación' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+}

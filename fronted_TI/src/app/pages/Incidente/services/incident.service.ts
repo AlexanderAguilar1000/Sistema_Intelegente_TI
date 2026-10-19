@@ -2,13 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import {
+  ClassificationValues,
+  ClassifyIncidentBody,
   Incident,
   IncidentApiResponse,
   IncidentDetail,
   IncidentDetailApiResponse,
   IncidentListApiResponse,
 } from '../models/incident.model';
-import { toIncident, toIncidentDetail } from '../utils/incident-api.util';
+import { AREA_CODE, PRIORITY_CODE, TYPE_CODE, toIncident, toIncidentDetail } from '../utils/incident-api.util';
 
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
@@ -45,5 +47,35 @@ export class IncidentService {
   /** GET /api/incidents/{id}: 404 si no existe, 403 si el técnico no es el asignado. */
   getDetail(id: number): Observable<IncidentDetail> {
     return this.http.get<IncidentDetailApiResponse>(`/api/incidents/${id}`).pipe(map(toIncidentDetail));
+  }
+
+  /** PATCH /api/incidents/{id}/classification: solo supervisor. Devuelve el detalle ya actualizado. */
+  correctClassification(id: number, values: ClassificationValues): Observable<IncidentDetail> {
+    const body: ClassifyIncidentBody = {
+      type: TYPE_CODE[values.type],
+      priority: PRIORITY_CODE[values.priority],
+      area: AREA_CODE[values.area],
+    };
+    return this.http.patch<IncidentDetailApiResponse>(`/api/incidents/${id}/classification`, body).pipe(
+      map(toIncidentDetail),
+      // Mantiene el listado en sincronía (clasificación y, si el área excluyó al técnico, estado/asignación).
+      tap((detail) =>
+        this.incidents.update((list) =>
+          list.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  status: detail.status,
+                  type: detail.type,
+                  priority: detail.priority,
+                  area: detail.area,
+                  pendingClassification: detail.pendingClassification,
+                  assignedToName: detail.assignedTo ? i.assignedToName : undefined,
+                }
+              : i,
+          ),
+        ),
+      ),
+    );
   }
 }
