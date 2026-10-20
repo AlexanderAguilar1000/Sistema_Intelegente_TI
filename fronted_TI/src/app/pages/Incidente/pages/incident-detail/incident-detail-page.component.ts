@@ -5,6 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { UsuariosService } from '../../../Usuarios/services/user.service';
+import { AssignDialogComponent } from '../../components/assign-dialog/assign-dialog.component';
 import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
 import { IncidentDetail } from '../../models/incident.model';
@@ -14,7 +15,7 @@ import { IncidentService } from '../../services/incident.service';
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })
@@ -25,6 +26,7 @@ export class IncidentDetailPageComponent {
 
   error = signal<string | null>(null);
   classificationOpen = signal(false);
+  assignOpen = signal(false);
   /** Detalle devuelto por el PATCH de clasificación; tiene prioridad sobre el cargado hasta cambiar de ruta. */
   private updated = signal<IncidentDetail | null>(null);
 
@@ -75,6 +77,10 @@ export class IncidentDetailPageComponent {
   isReassign = computed(() => !!this.incident()?.assignedTo);
   /** Asignar exige clasificación previa. */
   assignDisabled = computed(() => !this.isReassign() && (!!this.incident()?.pendingClassification || !this.incident()?.area));
+
+  onAssigned(detail: IncidentDetail): void {
+    this.updated.set(detail);
+  }
 
   onClassificationSaved(detail: IncidentDetail): void {
     this.updated.set(detail);

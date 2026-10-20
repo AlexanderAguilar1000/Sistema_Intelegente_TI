@@ -14,7 +14,13 @@ import { RoleBadgeComponent } from '../role-badge/role-badge.component';
 export class UserOptionComponent {
   user = input.required<AppUser>();
   selected = input(false);
+  /** Muestra el badge de rol (el selector de usuario lo usa; el diálogo de asignar no). */
+  showRole = input(true);
+  /** Avatar grande (44 px) o normal (32 px). */
+  large = input(true);
+  /** Texto secundario; por defecto "Rol · Área". */
+  subtitleText = input<string>();
   select = output<void>();
 
-  subtitle = computed(() => roleLine(this.user()));
+  subtitle = computed(() => this.subtitleText() ?? roleLine(this.user()));
 }

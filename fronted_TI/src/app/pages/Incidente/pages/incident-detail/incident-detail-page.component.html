@@ -40,7 +40,7 @@
             </svg>
             Corregir clasificación
           </button>
-          <button type="button" class="btn-primary" [disabled]="assignDisabled()" [title]="assignDisabled() ? 'Clasifica el incidente antes de asignar' : ''">
+          <button type="button" class="btn-primary" [disabled]="assignDisabled()" (click)="assignOpen.set(true)" [title]="assignDisabled() ? 'Clasifica el incidente antes de asignar' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m16 11 2 2 4-4" />
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -76,6 +76,8 @@
       (closed)="classificationOpen.set(false)"
       (saved)="onClassificationSaved($event)"
     />
+
+    <app-assign-dialog [open]="assignOpen()" [incident]="inc" (closed)="assignOpen.set(false)" (saved)="onAssigned($event)" />
   } @else if (incident() === null) {
     <div class="empty-state"><p>{{ error() }}</p></div>
   } @else {

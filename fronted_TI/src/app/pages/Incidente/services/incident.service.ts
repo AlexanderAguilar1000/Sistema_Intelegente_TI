@@ -49,6 +49,18 @@ export class IncidentService {
     return this.http.get<IncidentDetailApiResponse>(`/api/incidents/${id}`).pipe(map(toIncidentDetail));
   }
 
+  /** PUT /api/incidents/{id}/assignment: solo supervisor. Devuelve el detalle actualizado (estado Asignado). */
+  assignIncident(id: number, technicianId: number, technicianName: string): Observable<IncidentDetail> {
+    return this.http.put<IncidentDetailApiResponse>(`/api/incidents/${id}/assignment`, { technicianId }).pipe(
+      map(toIncidentDetail),
+      tap((detail) =>
+        this.incidents.update((list) =>
+          list.map((i) => (i.id === id ? { ...i, status: detail.status, assignedToName: technicianName } : i)),
+        ),
+      ),
+    );
+  }
+
   /** PATCH /api/incidents/{id}/classification: solo supervisor. Devuelve el detalle ya actualizado. */
   correctClassification(id: number, values: ClassificationValues): Observable<IncidentDetail> {
     const body: ClassifyIncidentBody = {

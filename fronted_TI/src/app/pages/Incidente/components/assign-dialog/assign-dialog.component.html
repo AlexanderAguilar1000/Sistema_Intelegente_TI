@@ -1,0 +1,49 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="assign-title" (click)="$event.stopPropagation()">
+      <header class="header">
+        <div>
+          <h2 id="assign-title">{{ title() }}</h2>
+          <p class="subtitle">Solo se muestran técnicos del área responsable: {{ incident().area ?? 'sin área' }}.</p>
+        </div>
+        <button type="button" class="close" aria-label="Cerrar" (click)="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="body" role="radiogroup" aria-label="Técnicos disponibles">
+        @for (tech of candidates(); track tech.id) {
+          <app-user-option
+            [user]="tech"
+            [selected]="selected() === tech.id"
+            [showRole]="false"
+            [large]="false"
+            [subtitleText]="tech.area ?? ''"
+            (select)="selected.set(tech.id)"
+          />
+        } @empty {
+          <div class="notice" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+              <path d="M12 9v4M12 17h.01" />
+            </svg>
+            <p>No hay técnicos dados de alta en el área responsable.</p>
+          </div>
+        }
+
+        @if (submitError()) {
+          <small class="error" role="alert">{{ submitError() }}</small>
+        }
+      </div>
+
+      <footer class="footer">
+        <button type="button" class="btn-outline" (click)="close()" [disabled]="saving()">Cancelar</button>
+        <button type="button" class="btn-primary" (click)="submit()" [disabled]="selected() === null || !candidates().length || saving()">
+          {{ saving() ? 'Asignando…' : 'Asignar' }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}
