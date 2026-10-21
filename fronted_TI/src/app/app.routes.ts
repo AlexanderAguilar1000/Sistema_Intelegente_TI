@@ -5,9 +5,9 @@ import { IncidentDetailPageComponent } from './pages/Incidente/pages/incident-de
 import { TecnicosComponent } from './pages/Tecnicos/tecnicos.component';
 
 export const routes: Routes = [
-    { path: 'incidentes', component: IncidenteComponent },
+    { path: 'incidentes', component: IncidenteComponent, canActivate: [roleGuard('Supervisor', '/mis-asignados')] },
     { path: 'incidentes/:id', component: IncidentDetailPageComponent },
-    { path: 'mis-asignados', component: IncidenteComponent, canActivate: [roleGuard('Técnico')], data: { view: 'technician' } },
+    { path: 'mis-asignados', component: IncidenteComponent, canActivate: [roleGuard('Técnico', '/incidentes')], data: { view: 'technician' } },
     { path: 'administracion', component: TecnicosComponent },
     { path: '', pathMatch: 'full', redirectTo: 'incidentes' },
 ];

@@ -6,7 +6,6 @@ import { IncidentTableComponent } from './components/incident-table/incident-tab
 import { StatCardComponent } from './components/stat-card/stat-card.component';
 import { Incident } from './models/incident.model';
 import { IncidentService } from './services/incident.service';
-import { mockIncidentsFor } from './utils/incident.mock';
 import { buildKpis, buildTechnicianKpis, currentPeriod } from './utils/incident.util';
 
 @Component({
@@ -24,14 +23,10 @@ export class IncidenteComponent {
   /** La ruta /mis-asignados reutiliza este componente con `data: { view: 'technician' }`. */
   readonly isTechnicianView = inject(ActivatedRoute).snapshot.data['view'] === 'technician';
 
-  // Vista técnico: datos de prueba, aún sin backend.
-  incidents = computed<Incident[]>(() => {
-    if (!this.isTechnicianView) return this.service.incidents();
-    const user = this.auth.activeUser();
-    return user ? mockIncidentsFor(user.fullName) : [];
-  });
-  loading = computed(() => !this.isTechnicianView && this.service.loading());
-  error = computed(() => (this.isTechnicianView ? null : this.service.error()));
+  // GET /api/incidents ya devuelve solo los asignados cuando el usuario activo es técnico.
+  incidents = this.service.incidents;
+  loading = this.service.loading;
+  error = this.service.error;
   kpis = computed(() => (this.isTechnicianView ? buildTechnicianKpis(this.incidents()) : buildKpis(this.incidents())));
   userName = computed(() => this.auth.activeUser()?.fullName ?? '');
   period = currentPeriod().toUpperCase();
@@ -41,9 +36,10 @@ export class IncidenteComponent {
     effect(() => {
       const user = this.auth.activeUser();
       if (!user) return;
-      // El selector de usuario no navega: si el activo deja de ser técnico, sale de esta vista.
-      if (this.isTechnicianView) {
-        if (user.role !== 'Técnico') untracked(() => this.router.navigate(['/incidentes']));
+      // El selector de usuario no navega: si el rol activo no corresponde a la vista, cambia de ruta.
+      const expected = this.isTechnicianView ? 'Técnico' : 'Supervisor';
+      if (user.role !== expected) {
+        untracked(() => this.router.navigate([this.isTechnicianView ? '/incidentes' : '/mis-asignados']));
         return;
       }
       // Recarga cuando hay (o cambia) el usuario activo: la API exige X-User-Id.
