@@ -23,6 +23,25 @@ h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.04em; color
 .btn-outline { background: #fff; color: #1d2733; border: 1px solid #dfe7f1; }
 .btn-outline:hover { background: #f3f7fd; }
 
+/* Botones de acción del técnico */
+.actions { align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px;
+  border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; white-space: nowrap; cursor: pointer;
+  border: 1px solid transparent; transition: background .15s, box-shadow .15s, transform .15s, border-color .15s, color .15s;
+}
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px #1768d940; }
+.btn:active { transform: translateY(1px); }
+.btn-primary.btn { background: linear-gradient(180deg, #2b7be8, #1768d9); box-shadow: 0 1px 2px #1768d940, 0 4px 12px #1768d933; }
+.btn-primary.btn:hover { background: linear-gradient(180deg, #1768d9, #1256b5); box-shadow: 0 2px 4px #1768d94d, 0 6px 16px #1768d940; transform: translateY(-1px); }
+.btn-ai { background: #f3f7fd; color: #1256b5; border-color: #cfddf4; }
+.btn-ai svg { color: #1768d9; }
+.btn-ai:hover, .btn-ai.active { background: #eaf1fd; border-color: #a9c4ef; }
+.btn-ghost { background: transparent; color: #637083; }
+.btn-ghost:hover { background: #fdf1f1; color: #c62f2f; border-color: #f3d0d0; }
+.divider { width: 1px; height: 24px; background: #dfe7f1; margin: 0 2px; }
+
 .detail-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: stretch; }
 .left-col { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
 .left-col app-incident-summary { align-self: stretch; }
@@ -41,5 +60,6 @@ h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.04em; color
   .page-heading { flex-direction: column; }
   .actions { width: 100%; justify-content: stretch; }
   .actions button { flex: 1; justify-content: center; }
+  .divider { display: none; }
   .detail-grid { grid-template-columns: 1fr; }
 }

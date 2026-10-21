@@ -11,7 +11,7 @@
       <div class="heading-text">
         <div class="id-row">
           <span class="incident-id">{{ inc.code }}</span>
-          <app-status-badge [status]="inc.status" />
+          <app-status-badge [status]="status() ?? inc.status" />
         </div>
         <h1>{{ inc.title }}</h1>
         <p class="subtitle">
@@ -50,6 +50,39 @@
           </button>
         </div>
       }
+
+      @if (canAnalyze()) {
+        <div class="actions">
+          @if (canStart()) {
+            <button type="button" class="btn btn-primary" (click)="startWork()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+              </svg>
+              Iniciar trabajo
+            </button>
+          }
+          <button type="button" class="btn btn-ai" [class.active]="aiOpen()" (click)="analyzeWithAi()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+              <path d="M20 3v4M22 5h-4M4 17v2M5 18H3" />
+            </svg>
+            Analizar con IA
+          </button>
+          @if (canResolve()) {
+            <button type="button" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              Resolver
+            </button>
+          }
+          @if (canClose()) {
+            <span class="divider" aria-hidden="true"></span>
+            <button type="button" class="btn btn-ghost">Cerrar sin solución</button>
+          }
+        </div>
+      }
     </header>
 
     <div class="detail-grid">
@@ -57,15 +90,19 @@
         <app-incident-summary [incident]="inc" />
       </div>
 
-      <section class="card">
-        <div class="card-header"><h2>Acciones del supervisor</h2></div>
-        <div class="card-body">
-          <p class="info">
-            Puedes corregir la clasificación, asignar al técnico del área responsable y relanzar la indexación. El estado cambia
-            automáticamente por las acciones del técnico.
-          </p>
-        </div>
-      </section>
+      @if (isTech()) {
+        <app-ai-recommendation-panel [open]="aiOpen()" />
+      } @else {
+        <section class="card">
+          <div class="card-header"><h2>Acciones del supervisor</h2></div>
+          <div class="card-body">
+            <p class="info">
+              Puedes corregir la clasificación, asignar al técnico del área responsable y relanzar la indexación. El estado cambia
+              automáticamente por las acciones del técnico.
+            </p>
+          </div>
+        </section>
+      }
     </div>
 
     <app-classification-dialog

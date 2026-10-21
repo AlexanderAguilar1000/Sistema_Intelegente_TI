@@ -4,18 +4,20 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { AuthService } from '../../../Usuarios/services/auth.service';
 import { UsuariosService } from '../../../Usuarios/services/user.service';
+import { AiRecommendationPanelComponent } from '../../components/ai-recommendation-panel/ai-recommendation-panel.component';
 import { AssignDialogComponent } from '../../components/assign-dialog/assign-dialog.component';
 import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
-import { IncidentDetail } from '../../models/incident.model';
+import { IncidentDetail, IncidentStatus } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { IncidentService } from '../../services/incident.service';
 
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, AiRecommendationPanelComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })
@@ -23,6 +25,7 @@ export class IncidentDetailPageComponent {
   private route = inject(ActivatedRoute);
   private service = inject(IncidentService);
   private usuarios = inject(UsuariosService);
+  private auth = inject(AuthService);
 
   error = signal<string | null>(null);
   classificationOpen = signal(false);
@@ -51,6 +54,33 @@ export class IncidentDetailPageComponent {
 
   incident = computed(() => this.updated() ?? this.loaded());
 
+  // --- Variante técnico (solo frontend: aún sin conexión al backend) ---
+  /** Técnico asignado a este incidente. */
+  isTech = computed(() => {
+    const user = this.auth.activeUser();
+    return user?.role === 'Técnico' && !!user && user.id === this.incident()?.assignedTo;
+  });
+  /** "Iniciar trabajo" se refleja solo en pantalla hasta tener endpoint. */
+  private started = signal(false);
+  aiOpen = signal(false);
+
+  status = computed<IncidentStatus | undefined>(() => {
+    const status = this.incident()?.status;
+    return status === 'Asignado' && this.started() ? 'En progreso' : status;
+  });
+  canStart = computed(() => this.isTech() && this.status() === 'Asignado');
+  canAnalyze = computed(() => this.isTech() && (this.status() === 'Asignado' || this.status() === 'En progreso'));
+  canResolve = computed(() => this.isTech() && this.status() === 'En progreso');
+  canClose = computed(() => this.canAnalyze());
+
+  startWork(): void {
+    this.started.set(true);
+  }
+
+  analyzeWithAi(): void {
+    this.aiOpen.set(true);
+  }
+
   constructor() {
     // El detalle trae ids de usuario; los nombres salen de GET /api/users.
     if (!this.usuarios.users().length) this.usuarios.load();
@@ -72,7 +102,8 @@ export class IncidentDetailPageComponent {
     const status = this.incident()?.status;
     return status === 'Resuelto' || status === 'Cerrado sin solución';
   });
-  canEdit = computed(() => !!this.incident() && !this.isFinal());
+  /** Acciones del supervisor: cualquier usuario que no sea técnico. */
+  canEdit = computed(() => !!this.incident() && !this.isFinal() && this.auth.activeUser()?.role !== 'Técnico');
   canRetry = computed(() => this.canEdit() && !!this.incident()?.pendingClassification);
   isReassign = computed(() => !!this.incident()?.assignedTo);
   /** Asignar exige clasificación previa. */
