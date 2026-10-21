@@ -41,6 +41,18 @@ export function buildKpis(incidents: Incident[], now: Date = new Date()): Incide
   ];
 }
 
+/** KPIs personales del técnico a partir de sus incidentes asignados. */
+export function buildTechnicianKpis(incidents: Incident[], now: Date = new Date()): IncidentKpi[] {
+  const inProgress = incidents.filter((i) => i.status === 'En progreso').length;
+  const resolved = incidents.filter((i) => i.status === 'Resuelto' && createdThisMonth(i, now)).length;
+
+  return [
+    { label: 'Asignados a mí', value: pad2(incidents.length), helper: 'Requieren atención', icon: 'user-check', tone: 'blue' },
+    { label: 'En progreso', value: pad2(inProgress), helper: 'Trabajo activo', icon: 'activity', tone: 'amber' },
+    { label: 'Resueltos este mes', value: pad2(resolved), helper: 'Buen ritmo', icon: 'shield-check', tone: 'green' },
+  ];
+}
+
 /** Busca por título o código (sin distinguir mayúsculas) y filtra por estado y prioridad. */
 export function filterIncidents(
   incidents: Incident[],

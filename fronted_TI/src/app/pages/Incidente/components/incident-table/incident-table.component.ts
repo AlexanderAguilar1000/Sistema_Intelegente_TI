@@ -16,6 +16,9 @@ export class IncidentTableComponent {
   incidents = input.required<Incident[]>();
   loading = input(false);
   error = input<string | null>(null);
+  heading = input('Todos los incidentes');
+  subheading = input('Consulta y gestiona el catálogo global de incidencias.');
+  showStatusFilter = input(true);
   open = output<Incident>();
 
   readonly statuses: IncidentStatus[] = STATUSES;

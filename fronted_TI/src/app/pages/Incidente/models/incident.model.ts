@@ -101,7 +101,7 @@ export interface IncidentKpi {
   label: string;
   value: string;
   helper: string;
-  icon: 'clipboard-list' | 'activity' | 'shield-check' | 'alert-circle';
+  icon: 'clipboard-list' | 'activity' | 'shield-check' | 'alert-circle' | 'user-check';
   tone: 'blue' | 'amber' | 'green' | 'red';
 }
 

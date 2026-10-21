@@ -1,25 +1,44 @@
 <div class="page-wrap">
   <header class="page-heading">
-    <div>
-      <p class="eyebrow">Centro de operaciones</p>
-      <h1>Incidentes</h1>
-      <p class="subtitle">Supervisa y gestiona las incidencias de soporte de TI.</p>
-    </div>
-    <button type="button" class="btn-primary" (click)="createOpen.set(true)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      Nuevo incidente
-    </button>
+    @if (isTechnicianView) {
+      <div>
+        <p class="eyebrow">Mi espacio de trabajo</p>
+        <h1>Mis asignados</h1>
+        <p class="subtitle">Incidentes asignados a {{ userName() }}.</p>
+      </div>
+    } @else {
+      <div>
+        <p class="eyebrow">Centro de operaciones</p>
+        <h1>Incidentes</h1>
+        <p class="subtitle">Supervisa y gestiona las incidencias de soporte de TI.</p>
+      </div>
+      <button type="button" class="btn-primary" (click)="createOpen.set(true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Nuevo incidente
+      </button>
+    }
   </header>
 
-  <section class="stats-grid" aria-label="Indicadores">
+  <section class="stats-grid" [class.stats-3]="isTechnicianView" aria-label="Indicadores">
     @for (kpi of kpis(); track kpi.label) {
       <app-stat-card [kpi]="kpi" [period]="period" />
     }
   </section>
 
-  <app-incident-create-dialog [open]="createOpen()" (closed)="createOpen.set(false)" />
-
-  <app-incident-table [incidents]="incidents()" [loading]="loading()" [error]="error()" (open)="openIncident($event)" />
+  @if (isTechnicianView) {
+    <app-incident-table
+      heading="Mis incidentes asignados"
+      subheading="Solo puedes ver incidentes donde eres el técnico responsable."
+      [showStatusFilter]="false"
+      [incidents]="incidents()"
+      [loading]="loading()"
+      [error]="error()"
+      (open)="openIncident($event)"
+    />
+  } @else {
+    <app-incident-create-dialog [open]="createOpen()" (closed)="createOpen.set(false)" />
+    <app-incident-table [incidents]="incidents()" [loading]="loading()" [error]="error()" (open)="openIncident($event)" />
+  }
 </div>

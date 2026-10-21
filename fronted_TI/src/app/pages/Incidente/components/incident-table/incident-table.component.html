@@ -1,8 +1,8 @@
 <section class="card">
   <div class="card-header">
     <div class="card-title">
-      <h2>Todos los incidentes <span class="count">{{ filtered().length }}</span></h2>
-      <p>Consulta y gestiona el catálogo global de incidencias.</p>
+      <h2>{{ heading() }} <span class="count">{{ filtered().length }}</span></h2>
+      <p>{{ subheading() }}</p>
     </div>
 
     <div class="filters">
@@ -14,17 +14,19 @@
         <input type="text" placeholder="Buscar por título o ID..." aria-label="Buscar incidentes" [value]="search()" (input)="onSearch($event)" />
       </label>
 
-      <label class="select">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 6h18M7 12h10M10 18h4" />
-        </svg>
-        <select aria-label="Filtrar por estado" [value]="status()" (change)="onStatus($event)">
-          <option value="all">Todos los estados</option>
-          @for (s of statuses; track s) {
-            <option [value]="s">{{ s }}</option>
-          }
-        </select>
-      </label>
+      @if (showStatusFilter()) {
+        <label class="select">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h18M7 12h10M10 18h4" />
+          </svg>
+          <select aria-label="Filtrar por estado" [value]="status()" (change)="onStatus($event)">
+            <option value="all">Todos los estados</option>
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </label>
+      }
 
       <label class="select">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

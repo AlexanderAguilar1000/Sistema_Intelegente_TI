@@ -132,7 +132,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-37 · Registrar un incidente desde la interfaz** — RF-3, RNF-4
   **Hecho cuando:** el formulario crea el incidente y muestra su clasificación, o el aviso de pendiente si la IA no respondió; el formulario advierte de no escribir contraseñas.
 
-- [ ] **T-38 · Abrir el detalle de un incidente** — RF-9
+- [x] **T-38 · Abrir el detalle de un incidente** — RF-9
   **Hecho cuando:** el detalle muestra todos los datos del incidente, y el supervisor lo ve sin el botón "Analizar con IA".
 
 - [x] **T-39 · Dar de alta un técnico desde la interfaz** — RF-2
