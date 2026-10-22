@@ -13,6 +13,7 @@ import { IncidentSummaryComponent } from '../../components/incident-summary/inci
 import { IncidentDetail, IncidentStatus } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { IncidentService } from '../../services/incident.service';
+import { getSimilarCases } from '../../utils/similar-cases.util';
 
 @Component({
   selector: 'app-incident-detail-page',
@@ -72,6 +73,12 @@ export class IncidentDetailPageComponent {
   canAnalyze = computed(() => this.isTech() && (this.status() === 'Asignado' || this.status() === 'En progreso'));
   canResolve = computed(() => this.isTech() && this.status() === 'En progreso');
   canClose = computed(() => this.canAnalyze());
+
+  /** Casos de referencia simulados; vendrán del servicio de IA. */
+  similarCases = computed(() => {
+    const inc = this.incident();
+    return inc ? getSimilarCases(inc) : [];
+  });
 
   startWork(): void {
     this.started.set(true);

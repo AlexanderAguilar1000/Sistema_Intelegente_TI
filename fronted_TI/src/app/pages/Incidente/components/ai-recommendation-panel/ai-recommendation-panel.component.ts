@@ -1,4 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
+import { SimilarCase } from '../../models/incident.model';
+import { SimilarCaseItemComponent } from '../similar-case-item/similar-case-item.component';
 
 interface DiagnosticStep {
   title: string;
@@ -18,11 +20,20 @@ const MOCK_STEPS: DiagnosticStep[] = [
 @Component({
   selector: 'app-ai-recommendation-panel',
   standalone: true,
+  imports: [SimilarCaseItemComponent],
   templateUrl: './ai-recommendation-panel.component.html',
   styleUrl: './ai-recommendation-panel.component.css'
 })
 export class AiRecommendationPanelComponent {
   /** false = bloqueado (antes de pulsar "Analizar con IA"). */
   open = input(false);
+  cases = input<SimilarCase[]>([]);
   steps = MOCK_STEPS;
+
+  /** Código del caso desplegado; solo uno a la vez. */
+  openCase = signal<string | null>(null);
+
+  toggle(code: string): void {
+    this.openCase.update((current) => (current === code ? null : code));
+  }
 }

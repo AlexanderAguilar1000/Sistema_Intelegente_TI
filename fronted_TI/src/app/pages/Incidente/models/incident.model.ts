@@ -79,6 +79,23 @@ export interface IncidentDetail extends Incident {
   closedAt?: string;
 }
 
+/** Incidente ya resuelto que la IA usa como referencia en el panel de diagnóstico. */
+export interface SimilarCase {
+  /** Código visible, formato INC-AAAA-NNNN. */
+  code: string;
+  title: string;
+  /** Porcentaje 0-100. */
+  similarity: number;
+  type: IncidentType;
+  priority: Priority;
+  area: TechArea;
+  status: IncidentStatus;
+  description: string;
+  solution: string;
+  resolvedBy: string;
+  resolvedAt: string;
+}
+
 /** Cuerpo de PATCH /api/incidents/{id}/classification (códigos de catálogo del backend). */
 export interface ClassifyIncidentBody {
   type: string;

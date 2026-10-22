@@ -91,7 +91,7 @@
       </div>
 
       @if (isTech()) {
-        <app-ai-recommendation-panel [open]="aiOpen()" />
+        <app-ai-recommendation-panel [open]="aiOpen()" [cases]="similarCases()" />
       } @else {
         <section class="card">
           <div class="card-header"><h2>Acciones del supervisor</h2></div>

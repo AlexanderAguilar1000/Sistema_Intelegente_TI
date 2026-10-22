@@ -1,0 +1,24 @@
+:host { display: block; }
+.reference-card { border: 1px solid #dfe7f1; border-radius: 12px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.reference-card:hover { border-color: #c9daf5; }
+.reference-card.open { border-color: #c9daf5; box-shadow: 0 2px 8px #1768d912; }
+
+.reference-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border: 0; border-radius: 12px; background: transparent; font-family: inherit; text-align: left; cursor: pointer; }
+.reference-item:focus-visible { outline: none; box-shadow: 0 0 0 3px #1768d940; }
+.lead-icon { width: 16px; height: 16px; flex: none; color: #326fd0; }
+.info { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: #1d2733; }
+.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: #637083; }
+.similarity { padding: 3px 10px; border-radius: 999px; background: #e9f1ff; color: #266cd0; font-size: 12px; font-weight: 700; }
+.chevron { width: 16px; height: 16px; flex: none; color: #637083; transition: transform .2s; }
+.open .chevron { transform: rotate(180deg); }
+.open .reference-item { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+.reference-detail { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-top: 1px solid #c9daf5; border-radius: 0 0 12px 12px; background: #f8fbff; }
+.badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid #dfe7f1; border-radius: 999px; font-size: 12px; color: #2b3745; background: #fff; }
+.chip svg { width: 12px; height: 12px; }
+.field-label { margin: 0 0 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #637083; }
+.text { margin: 0; font-size: 13px; line-height: 1.55; color: #637083; }
+.text.strong { color: #2b3745; }
+.foot { margin: 0; font-size: 11px; color: #637083; }
