@@ -9,6 +9,7 @@ import { UsuariosService } from '../../../Usuarios/services/user.service';
 import { AiRecommendationPanelComponent } from '../../components/ai-recommendation-panel/ai-recommendation-panel.component';
 import { AssignDialogComponent } from '../../components/assign-dialog/assign-dialog.component';
 import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
+import { ResolveDialogComponent } from '../../components/resolve-dialog/resolve-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
 import { IncidentDetail, IncidentStatus } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
@@ -18,7 +19,7 @@ import { getSimilarCases } from '../../utils/similar-cases.util';
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, AiRecommendationPanelComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, ResolveDialogComponent, AiRecommendationPanelComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })
@@ -31,6 +32,7 @@ export class IncidentDetailPageComponent {
   error = signal<string | null>(null);
   classificationOpen = signal(false);
   assignOpen = signal(false);
+  resolveOpen = signal(false);
   /** Detalle devuelto por el PATCH de clasificación; tiene prioridad sobre el cargado hasta cambiar de ruta. */
   private updated = signal<IncidentDetail | null>(null);
 
@@ -61,14 +63,11 @@ export class IncidentDetailPageComponent {
     const user = this.auth.activeUser();
     return user?.role === 'Técnico' && !!user && user.id === this.incident()?.assignedTo;
   });
-  /** "Iniciar trabajo" se refleja solo en pantalla hasta tener endpoint. */
-  private started = signal(false);
   aiOpen = signal(false);
+  starting = signal(false);
+  actionError = signal<string | null>(null);
 
-  status = computed<IncidentStatus | undefined>(() => {
-    const status = this.incident()?.status;
-    return status === 'Asignado' && this.started() ? 'En progreso' : status;
-  });
+  status = computed<IncidentStatus | undefined>(() => this.incident()?.status);
   canStart = computed(() => this.isTech() && this.status() === 'Asignado');
   canAnalyze = computed(() => this.isTech() && (this.status() === 'Asignado' || this.status() === 'En progreso'));
   canResolve = computed(() => this.isTech() && this.status() === 'En progreso');
@@ -81,7 +80,20 @@ export class IncidentDetailPageComponent {
   });
 
   startWork(): void {
-    this.started.set(true);
+    const inc = this.incident();
+    if (!inc || this.starting()) return;
+    this.starting.set(true);
+    this.actionError.set(null);
+    this.service.startIncident(inc.id).subscribe({
+      next: (detail) => {
+        this.updated.set(detail);
+        this.starting.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.actionError.set(err.error?.message ?? 'No se pudo iniciar el trabajo del incidente.');
+        this.starting.set(false);
+      },
+    });
   }
 
   analyzeWithAi(): void {
@@ -117,6 +129,10 @@ export class IncidentDetailPageComponent {
   assignDisabled = computed(() => !this.isReassign() && (!!this.incident()?.pendingClassification || !this.incident()?.area));
 
   onAssigned(detail: IncidentDetail): void {
+    this.updated.set(detail);
+  }
+
+  onResolved(detail: IncidentDetail): void {
     this.updated.set(detail);
   }
 

@@ -12,7 +12,7 @@ public record IncidentDetailResponse(
         String type,
         String priority,
         String area,
-        Long createdBy,
+        Long createdBy, 
         Long assignedTo,
         Long assignedBy,
         String solution,
