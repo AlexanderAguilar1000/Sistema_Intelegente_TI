@@ -81,6 +81,16 @@ export class IncidentService {
     );
   }
 
+  /** POST /api/incidents/{id}/closure: solo el técnico asignado. Devuelve el detalle actualizado (Cerrado sin solución). */
+  closeWithoutSolution(id: number, reason: string): Observable<IncidentDetail> {
+    return this.http.post<IncidentDetailApiResponse>(`/api/incidents/${id}/closure`, { reason }).pipe(
+      map(toIncidentDetail),
+      tap((detail) =>
+        this.incidents.update((list) => list.map((i) => (i.id === id ? { ...i, status: detail.status } : i))),
+      ),
+    );
+  }
+
   /** PATCH /api/incidents/{id}/classification: solo supervisor. Devuelve el detalle ya actualizado. */
   correctClassification(id: number, values: ClassificationValues): Observable<IncidentDetail> {
     const body: ClassifyIncidentBody = {

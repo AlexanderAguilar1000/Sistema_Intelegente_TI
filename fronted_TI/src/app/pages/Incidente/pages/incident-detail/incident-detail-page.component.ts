@@ -9,6 +9,7 @@ import { UsuariosService } from '../../../Usuarios/services/user.service';
 import { AiRecommendationPanelComponent } from '../../components/ai-recommendation-panel/ai-recommendation-panel.component';
 import { AssignDialogComponent } from '../../components/assign-dialog/assign-dialog.component';
 import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
+import { CloseDialogComponent } from '../../components/close-dialog/close-dialog.component';
 import { ResolveDialogComponent } from '../../components/resolve-dialog/resolve-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
 import { IncidentDetail, IncidentStatus } from '../../models/incident.model';
@@ -19,7 +20,7 @@ import { getSimilarCases } from '../../utils/similar-cases.util';
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, ResolveDialogComponent, AiRecommendationPanelComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, ResolveDialogComponent, CloseDialogComponent, AiRecommendationPanelComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })
@@ -33,6 +34,7 @@ export class IncidentDetailPageComponent {
   classificationOpen = signal(false);
   assignOpen = signal(false);
   resolveOpen = signal(false);
+  closeOpen = signal(false);
   /** Detalle devuelto por el PATCH de clasificación; tiene prioridad sobre el cargado hasta cambiar de ruta. */
   private updated = signal<IncidentDetail | null>(null);
 
@@ -133,6 +135,10 @@ export class IncidentDetailPageComponent {
   }
 
   onResolved(detail: IncidentDetail): void {
+    this.updated.set(detail);
+  }
+
+  onClosed(detail: IncidentDetail): void {
     this.updated.set(detail);
   }
 

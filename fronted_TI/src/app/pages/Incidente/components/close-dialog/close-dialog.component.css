@@ -1,0 +1,66 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, .45);
+  backdrop-filter: blur(4px);
+}
+.dialog {
+  width: 100%;
+  max-width: 512px;
+  max-height: 100%;
+  overflow: auto;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
+}
+
+.header { display: flex; justify-content: space-between; gap: 16px; padding: 20px 24px 0; }
+h2 { margin: 0; font-size: 19px; font-weight: 600; color: #1d2733; }
+.subtitle { margin: 6px 0 0; font-size: 15px; color: #637083; }
+.close {
+  display: grid; place-items: center; flex: none;
+  width: 32px; height: 32px;
+  border: 1px solid #e3e8ef; border-radius: 8px;
+  background: #fff; color: #1d2733; cursor: pointer;
+}
+.close svg { width: 16px; height: 16px; }
+.close:hover { background: #f3f7fd; }
+
+.body { display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 24px; }
+label { font-size: 14px; font-weight: 500; color: #1d2733; }
+textarea {
+  width: 100%; box-sizing: border-box; resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid #d9e0ea; border-radius: 8px;
+  font: inherit; font-size: 14px; color: #1d2733;
+}
+textarea:focus { outline: 2px solid #1768d9; outline-offset: -1px; }
+
+.error { color: #d34040; font-size: 13px; }
+
+.footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #e3e8ef;
+  background: #f8fafc;
+}
+.btn-outline, .btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 36px; padding: 0 16px;
+  border-radius: 8px;
+  font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+}
+.btn-outline { border: 1px solid #d9e0ea; background: #fff; color: #1d2733; }
+.btn-outline:hover:not(:disabled) { background: #f3f7fd; }
+.btn-primary { border: 0; background: #1768d9; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #1256b5; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .footer { flex-direction: column-reverse; }
+  .footer button { width: 100%; }
+}

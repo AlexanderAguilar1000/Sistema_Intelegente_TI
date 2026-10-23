@@ -1,0 +1,40 @@
+@if (open()) {
+  <div class="overlay" (click)="close()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="close-title" (click)="$event.stopPropagation()">
+      <header class="header">
+        <div>
+          <h2 id="close-title">Cerrar sin solución</h2>
+          <p class="subtitle">{{ incident().code }} · {{ incident().title }}</p>
+        </div>
+        <button type="button" class="close" aria-label="Cerrar" (click)="close()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="body">
+        <label for="close-reason">Motivo del cierre</label>
+        <textarea
+          id="close-reason"
+          rows="6"
+          placeholder="Explica por qué el incidente se cierra sin solución"
+          [ngModel]="reason()"
+          (ngModelChange)="reason.set($event)"
+          [disabled]="saving()"
+        ></textarea>
+
+        @if (submitError()) {
+          <small class="error" role="alert">{{ submitError() }}</small>
+        }
+      </div>
+
+      <footer class="footer">
+        <button type="button" class="btn-outline" (click)="close()" [disabled]="saving()">Cancelar</button>
+        <button type="button" class="btn-primary" (click)="submit()" [disabled]="!reason().trim() || saving()">
+          {{ saving() ? 'Registrando…' : 'Registrar' }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}
