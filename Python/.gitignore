@@ -1,0 +1,10 @@
+.venv/
+venv/
+env/
+
+# Variables de entorno / secretos
+.env
+
+
+#Configuración local de Claude Code
+.claude/settings.local.json 

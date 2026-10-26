@@ -26,6 +26,7 @@ Sistema de gestión y resolución de incidentes de TI que permite registrar, cla
 - `SistemaInteligenteTI/` --> Backend Spring Boot 
 - `SistemaInteligenteTI/src/main/java/com/corporativoTI/SistemaInteligenteTI/` --> Código backend 
 -  `SistemaInteligenteTI/src/test/java/com/corporativoTI/SistemaInteligenteTI/` -->pruebas automatizadas 
+- `Python/`--> Python Código
 
 ## Reglas
 - Lee docs/constitution.md y la spec activa antes de tocar código.
