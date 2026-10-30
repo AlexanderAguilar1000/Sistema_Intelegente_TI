@@ -83,7 +83,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 ## Bloque 3 — Servicio de IA
 
-- [ ] **T-23 · Arrancar el servicio de IA con el modelo cargado** — RF-4, RF-13
+- [x] **T-23 · Arrancar el servicio de IA con el modelo cargado** — RF-4, RF-13
   **Hecho cuando:** `uvicorn app.main:app --port 8001` arranca, el modelo `paraphrase-multilingual-MiniLM-L12-v2` queda cargado una sola vez al inicio y `GET /ai/v1/health` responde indicando el modelo en uso; `pytest` pasa con al menos ese test.
 
 - [ ] **T-24 · Clasificar un incidente con Groq** — RF-4

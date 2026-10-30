@@ -8,3 +8,9 @@ env/
 
 #Configuración local de Claude Code
 .claude/settings.local.json 
+
+#pycache
+__pycache__/
+
+#init 
+__init__.py
