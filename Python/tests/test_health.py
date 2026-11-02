@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from app.infrastructure.embedder import EMBEDDING_DIMENSIONS, MODEL_NAME, Embedder
+from app.clients.embedder import EMBEDDING_DIMENSIONS, MODEL_NAME, Embedder
 from app.main import create_app
 
 

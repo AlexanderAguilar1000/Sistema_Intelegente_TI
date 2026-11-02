@@ -6,7 +6,8 @@ from sentence_transformers import SentenceTransformer
 MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 EMBEDDING_DIMENSIONS = 384
 
-#Este embeder lo que hace es cargar el modelo 
+
+# Este embeder lo que hace es cargar el modelo
 class EmbedderInfo(Protocol):
     """Datos del modelo de embeddings en uso."""
 
@@ -30,4 +31,6 @@ class Embedder:
     @classmethod
     def load(cls) -> "Embedder":
         """Carga el modelo desde la caché local (o lo descarga la primera vez)."""
-        return cls(SentenceTransformer(MODEL_NAME))#carga el modelo  que desgarde de hugging face 
+        return cls(
+            SentenceTransformer(MODEL_NAME)
+        )  # carga el modelo  que desgarde de hugging face

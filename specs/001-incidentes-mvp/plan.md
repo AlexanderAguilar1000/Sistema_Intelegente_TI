@@ -39,13 +39,16 @@ Capas por módulo: `controller` (entrada/salida REST) → `dto` (contratos de pe
 - `audit` — registro de eventos de cada acción (RNF-6).
 - `shared` — errores de negocio, respuesta de error homogénea, configuración.
 
-### 1.3 Servicio de IA FastAPI (`ai-service/`) — dueño de embeddings y RAG
-- `api/` — routers `classifications`, `analyses`, `embeddings`, `health`: validan el cuerpo y delegan.
-- `domain/classification.py` — construcción del prompt y validación contra el catálogo recibido (RF-4).
-- `domain/retrieval.py` — embedding de la consulta, búsqueda de los 3 vecinos más cercanos con umbral, exclusión del propio incidente y de los no indexados (RF-11, RF-13).
-- `domain/recommendation.py` — prompt RAG con casos similares, recomendación general si no hay casos, validación de que haya al menos un paso con texto (RF-11).
-- `domain/prompting.py` — delimitación del texto de usuario como dato, no como instrucción (RNF-5).
-- `infrastructure/groq_client.py`; `infrastructure/embedder.py`, que carga una sola vez al arrancar el modelo `paraphrase-multilingual-MiniLM-L12-v2` de sentence-transformers y lo reutiliza en cada petición; `infrastructure/vector_store.py`, única pieza que escribe y consulta `incident_embeddings`.
+### 1.3 Servicio de IA FastAPI (`Python/`) — dueño de embeddings y RAG
+Capas por responsabilidad, análogas a las del backend (decisión D15): `api` → `schemas` → `services` → `repositories` / `clients`. Un módulo solo existe cuando la tarea que lo necesita lo crea.
+- `api/` — routers `classifications`, `analyses`, `embeddings`, `health` (equivalen a los controladores): validan el cuerpo y delegan.
+- `schemas/` — modelos Pydantic de petición y respuesta, incluido el `Catalog` recibido (equivalen a los DTO).
+- `services/classification_service.py` — construcción del prompt y validación contra el catálogo recibido (RF-4).
+- `services/retrieval_service.py` — embedding de la consulta, búsqueda de los 3 vecinos más cercanos con umbral, exclusión del propio incidente y de los no indexados (RF-11, RF-13).
+- `services/recommendation_service.py` — prompt RAG con casos similares, recomendación general si no hay casos, validación de que haya al menos un paso con texto (RF-11).
+- `services/prompting.py` — delimitación del texto de usuario como dato, no como instrucción (RNF-5).
+- `clients/groq_client.py` y `clients/embedder.py` — clientes de lo externo; el embedder carga una sola vez al arrancar el modelo `paraphrase-multilingual-MiniLM-L12-v2` de sentence-transformers y lo reutiliza en cada petición.
+- `repositories/embedding_repository.py` — única pieza que escribe y consulta `incident_embeddings`; `db/` aloja la conexión a PostgreSQL que usa. Ambos se crean con T-26.
 - `core/` — configuración, claves por variable de entorno (RNF-3), errores tipados.
 
 ### 1.4 Migraciones (`backend/src/main/resources/db/migration`) — RF-2, RF-3, RF-13
@@ -180,6 +183,7 @@ Toda transición pasa por `IncidentStateMachine`; los controladores no deciden (
 | D12 | Tests de integración contra la **instalación local de PostgreSQL+pgvector**, en una base de datos separada de la de desarrollo (por ejemplo `ti_incidentes_test`), con la conexión por variables de entorno y limpieza de datos en cada prueba (principio 4) | Es el único modo de probar de verdad las restricciones, las migraciones y la búsqueda vectorial, y no añade ninguna dependencia nueva al entorno del desarrollador | Base en memoria H2: no soporta pgvector ni los tipos usados. Docker o Testcontainers: descartados porque el MVP no debe depender de contenedores, y Testcontainers sería además una librería nueva |
 | D13 | El servicio Python **no llama nunca** al backend (sección 3.2) | Evita dependencia circular y deja un solo sentido de comunicación, más fácil de simular en tests | Devolución asíncrona de la clasificación desde Python hacia Spring Boot, como se planteó en la idea inicial: obliga a exponer un endpoint de retorno y a gestionar reintentos |
 | D14 | Paquetes del backend Spring Boot organizados por módulo con capas **`controller` / `dto` / `service` / `model` / `repository`** (sección 1.2), en vez de las capas `web` (controlador+DTO) y `domain` (entidades+enums) que fijaba la versión anterior de este plan | Decisión explícita del usuario tras revisar la implementación de T-03: separa controlador y DTO en paquetes propios y nombra en inglés la capa de entidades (`model`) y la de persistencia (`repository`), siguiendo la convención habitual de Spring Boot | Capas `web`/`domain` de la versión anterior de este plan: agrupaban controlador y DTO en un mismo paquete y usaban `domain` para entidades y máquina de estados; se descartan por decisión explícita del usuario, no por un defecto técnico |
+| D15 | Servicio Python organizado en capas **`api` / `schemas` / `services` / `repositories` / `clients` / `core` / `db`** (sección 1.3), en vez de `api` / `domain` / `infrastructure` | Decisión explícita del usuario: es la estructura más reconocible en FastAPI y paralela a la del backend (D14), de modo que ambos servicios se explican con el mismo vocabulario | `domain`/`infrastructure` (estilo hexagonal): exigía mover los puertos al dominio para ser coherente y era más difícil de justificar para este tamaño de servicio |
 
 ## 6. Estrategia de test
 
@@ -211,16 +215,16 @@ Regla de cierre: ninguna tarea se da por terminada con `./mvnw test` o `pytest` 
 | RF-1 Usuario activo y roles | `users`, `core/` y `user-switcher/` Angular | `GET /api/users`, cabecera `X-User-Id` | Backend 3, Angular |
 | RF-2 Alta de técnicos | `users`, `technicians/` | `POST /api/technicians` | Backend 1, 4 |
 | RF-3 Registro síncrono | `incidents.service`, `ai` | `POST /api/incidents` → `/ai/v1/classifications` | Backend 1, 2, 5 |
-| RF-4 Clasificación con IA | `ai`, `domain/classification.py` | `/ai/v1/classifications` | Backend 2, 5; IA 1 |
+| RF-4 Clasificación con IA | `ai`, `services/classification_service.py` | `/ai/v1/classifications` | Backend 2, 5; IA 1 |
 | RF-5 Catálogos | `catalog`, `shared/` | `GET /api/catalogs` | Backend 1; IA 1 |
 | RF-6 Corrección manual | `incidents.model`, `incidents/classification/` | `PATCH .../classification` | Backend 1, 4 |
 | RF-7 Asignación y reasignación | `incidents.model`, `users`, `incidents/assignment/` | `PUT .../assignment`, `GET /api/technicians?area=` | Backend 1, 3, 4 |
 | RF-8 Listado y filtrado | `incidents.service`, `incidents/list/` | `GET /api/incidents` | Backend 4; Angular |
 | RF-9 Detalle | `incidents.controller`, `incidents/detail/` | `GET /api/incidents/{id}` | Backend 3; Angular |
 | RF-10 Inicio del trabajo | `incidents.model` | `POST .../start` | Backend 1 |
-| RF-11 Analizar con IA | `ai`, `domain/retrieval.py`, `domain/recommendation.py` | `/ai/v1/analyses` | Backend 2, 3, 5; IA 2, 4, 5 |
+| RF-11 Analizar con IA | `ai`, `services/retrieval_service.py`, `services/recommendation_service.py` | `/ai/v1/analyses` | Backend 2, 3, 5; IA 2, 4, 5 |
 | RF-12 Resolución | `incidents.model` | `POST .../resolution` | Backend 1, 4 |
-| RF-13 Histórico e indexación | `ai`, `infrastructure/vector_store.py` | `/ai/v1/embeddings`, `POST .../index/retry` | Backend 2, 5; IA 4, 5 |
+| RF-13 Histórico e indexación | `ai`, `repositories/embedding_repository.py` | `/ai/v1/embeddings`, `POST .../index/retry` | Backend 2, 5; IA 4, 5 |
 | RF-14 Cierre sin solución | `incidents.model` | `POST .../closure` | Backend 1, 4 |
 
 ## 8. Orden de implementación sugerido

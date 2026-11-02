@@ -86,7 +86,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-23 · Arrancar el servicio de IA con el modelo cargado** — RF-4, RF-13
   **Hecho cuando:** `uvicorn app.main:app --port 8001` arranca, el modelo `paraphrase-multilingual-MiniLM-L12-v2` queda cargado una sola vez al inicio y `GET /ai/v1/health` responde indicando el modelo en uso; `pytest` pasa con al menos ese test.
 
-- [ ] **T-24 · Clasificar un incidente con Groq** — RF-4
+- [x] **T-24 · Clasificar un incidente con Groq** — RF-4
   **Hecho cuando:** `POST /ai/v1/classifications` devuelve tipo, prioridad y área del catálogo recibido; si Groq responde un valor fuera de catálogo devuelve 422 y si no responde devuelve 503; pytest con Groq simulado en los tres casos.
 
 - [ ] **T-25 · Blindar los prompts frente al texto del usuario** — RNF-4, RNF-5
