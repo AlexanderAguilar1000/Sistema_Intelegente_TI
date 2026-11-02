@@ -20,12 +20,14 @@ from time import perf_counter
 from app.clients.groq_client import LlmClient
 from app.core.errors import InvalidClassificationError
 from app.schemas.classification import Catalog
+from app.services.prompting import DO_NOT_OBEY_INSTRUCTION, wrap_untrusted
 
 # Instrucción fija para el modelo. Le pide devolver solo JSON con tres claves y
 # limitarse a los valores de las listas que se le dan en el mensaje del usuario.
 SYSTEM_PROMPT = (
     "Eres un clasificador de incidentes de TI. Responde únicamente con un objeto JSON "
-    'con las claves "type", "priority" y "area", usando solo valores de las listas dadas.'
+    'con las claves "type", "priority" y "area", usando solo valores de las listas dadas. '
+    + DO_NOT_OBEY_INSTRUCTION
 )
 
 
@@ -51,8 +53,7 @@ def build_user_prompt(title: str, description: str, catalog: Catalog) -> str:
     código: el backend es la única fuente de verdad de los catálogos (decisión D4).
     """
     return (
-        f"Título: {title}\n"
-        f"Descripción: {description}\n\n"
+        f"{wrap_untrusted(title, description)}\n\n"
         f"Tipos permitidos: {', '.join(catalog.types)}\n"
         f"Prioridades permitidas: {', '.join(catalog.priorities)}\n"
         f"Áreas permitidas: {', '.join(catalog.areas)}"
@@ -83,7 +84,10 @@ def classify(
     # Se mide solo la llamada a Groq, que es la parte lenta.
     started = perf_counter()
     reply = client.complete(
-        SYSTEM_PROMPT, build_user_prompt(title, description, catalog)#le doy la información  y le doy el prompt 
+        SYSTEM_PROMPT,
+        build_user_prompt(
+            title, description, catalog
+        ),  # le doy la información  y le doy el prompt
     )
     elapsed_ms = int((perf_counter() - started) * 1000)
 
@@ -91,14 +95,20 @@ def classify(
     # ValueError: JSON mal formado. KeyError: falta una clave.
     # TypeError: el JSON no es un objeto (p. ej. una lista o un número).
     try:
-        data = json.loads(reply)#el texto que devuelve groq lo convierto a json
-        values = (data["type"], data["priority"], data["area"])# extraigo los valores de tipo, prioridad y area del json 
+        data = json.loads(reply)  # el texto que devuelve groq lo convierto a json
+        values = (
+            data["type"],
+            data["priority"],
+            data["area"],
+        )  # extraigo los valores de tipo, prioridad y area del json
     except (ValueError, KeyError, TypeError) as error:
         raise InvalidClassificationError("respuesta de Groq no válida") from error
 
     # Aunque el prompt lo pide, el modelo puede inventarse un valor. Por eso se
     # comprueba cada uno contra el catálogo antes de darlo por bueno.
-    type_, priority, area = values #aca verifica que los valores que devuelva groq  esten dentro de los valores de type , priority , area que estan en el sistema
+    type_, priority, area = (
+        values  # aca verifica que los valores que devuelva groq  esten dentro de los valores de type , priority , area que estan en el sistema
+    )
     if (
         type_ not in catalog.types
         or priority not in catalog.priorities

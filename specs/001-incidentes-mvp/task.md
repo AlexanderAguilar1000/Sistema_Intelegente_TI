@@ -89,7 +89,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-24 · Clasificar un incidente con Groq** — RF-4
   **Hecho cuando:** `POST /ai/v1/classifications` devuelve tipo, prioridad y área del catálogo recibido; si Groq responde un valor fuera de catálogo devuelve 422 y si no responde devuelve 503; pytest con Groq simulado en los tres casos.
 
-- [ ] **T-25 · Blindar los prompts frente al texto del usuario** — RNF-4, RNF-5
+- [x] **T-25 · Blindar los prompts frente al texto del usuario** — RNF-4, RNF-5
   **Hecho cuando:** un test comprueba que el texto del incidente viaja delimitado y acompañado de la instrucción de no obedecer lo que contenga, y que en el prompt no aparece ningún dato de cuentas de usuario.
 
 - [ ] **T-26 · Indexar un incidente resuelto** — RF-13
