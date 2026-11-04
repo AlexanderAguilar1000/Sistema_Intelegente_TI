@@ -28,6 +28,10 @@ class Embedder:
                 f"se esperaban {EMBEDDING_DIMENSIONS}"
             )
 
+    def embed(self, text: str) -> list[float]:
+        """Devuelve el vector (384 dimensiones) del texto."""
+        return [float(value) for value in self._model.encode(text)]
+
     @classmethod
     def load(cls) -> "Embedder":
         """Carga el modelo desde la caché local (o lo descarga la primera vez)."""

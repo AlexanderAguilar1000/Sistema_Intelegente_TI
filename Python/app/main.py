@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 
@@ -6,10 +7,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.classifications import router as classifications_router
+from app.api.embeddings import router as embeddings_router
 from app.api.health import router as health_router
 from app.clients.embedder import Embedder, EmbedderInfo
 from app.clients.groq_client import GroqClient, LlmClient
 from app.core.errors import AiUnavailableError, InvalidClassificationError
+from app.repositories.embedding_repository import EmbeddingRepository
+from app.services.embedding_service import EmbeddingStore
 
 load_dotenv()
 
@@ -29,6 +33,7 @@ def create_app(
     # y este devuelve el modelo de hugging face entonces esto devuelve
     # el nombre del modelo y las dimensiones de este modelo
     groq_client: LlmClient | None = None,
+    embedding_repository: EmbeddingStore | None = None,
 ) -> FastAPI:
     """Crea la aplicación; el modelo se carga una sola vez, al arrancar."""  # claro el modelo de IA se carga una sola vez no cada vez que se hace una llamada HTTP
 
@@ -38,6 +43,10 @@ def create_app(
             embedder_loader()
         )  # entonces aqui llamo a la función embedder_loader para cargar el modelo
         app.state.groq = groq_client or GroqClient()
+        # La conexión a PostgreSQL se abre por petición; aquí solo se guarda la URL.
+        app.state.embedding_repository = embedding_repository or EmbeddingRepository(
+            os.environ.get("DATABASE_URL", "")
+        )
         yield
 
     app = FastAPI(title="Servicio de IA", lifespan=lifespan)
@@ -45,6 +54,7 @@ def create_app(
         health_router
     )  # guarda la ruta del enpoind que se encuentra en health.py
     app.include_router(classifications_router)
+    app.include_router(embeddings_router)
 
     @app.exception_handler(InvalidClassificationError)
     async def invalid_classification(

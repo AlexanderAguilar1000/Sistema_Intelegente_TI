@@ -92,7 +92,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-25 · Blindar los prompts frente al texto del usuario** — RNF-4, RNF-5
   **Hecho cuando:** un test comprueba que el texto del incidente viaja delimitado y acompañado de la instrucción de no obedecer lo que contenga, y que en el prompt no aparece ningún dato de cuentas de usuario.
 
-- [ ] **T-26 · Indexar un incidente resuelto** — RF-13
+- [x] **T-26 · Indexar un incidente resuelto** — RF-13
   **Hecho cuando:** `POST /ai/v1/embeddings` genera con sentence-transformers un vector de 384 dimensiones a partir del título, la descripción y la solución, y deja la fila en `incident_embeddings`; llamarlo dos veces sobre el mismo incidente deja una sola fila actualizada; pytest.
 
 - [ ] **T-27 · Encontrar los incidentes más parecidos** — RF-11, RF-13
