@@ -34,9 +34,9 @@ def index_incident(
     Cualquier fallo al guardar se traduce a AiUnavailableError para que el
     backend marque el incidente como no indexado sin perder la solución (RNF-8).
     """
-    embedding = embedder.embed(build_text(request))
+    embedding = embedder.embed(build_text(request))#convierte el texto en un vector numerico 
     try:
-        store.upsert(request.incident_id, embedding, embedder.model_name)
+        store.upsert(request.incident_id, embedding, embedder.model_name)#guarda en la base de datos el vector númerico
     except AiUnavailableError:
         raise
     except Exception as error:

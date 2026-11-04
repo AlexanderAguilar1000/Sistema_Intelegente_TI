@@ -28,9 +28,9 @@ class Embedder:
                 f"se esperaban {EMBEDDING_DIMENSIONS}"
             )
 
-    def embed(self, text: str) -> list[float]:
+    def embed(self, text: str) -> list[float]:   #Convierte el v ector en un vector númerico 
         """Devuelve el vector (384 dimensiones) del texto."""
-        return [float(value) for value in self._model.encode(text)]
+        return [float(value) for value in self._model.encode(text)]#aca lo convierte especificamente en vector numerico 
 
     @classmethod
     def load(cls) -> "Embedder":

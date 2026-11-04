@@ -95,7 +95,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-26 · Indexar un incidente resuelto** — RF-13
   **Hecho cuando:** `POST /ai/v1/embeddings` genera con sentence-transformers un vector de 384 dimensiones a partir del título, la descripción y la solución, y deja la fila en `incident_embeddings`; llamarlo dos veces sobre el mismo incidente deja una sola fila actualizada; pytest.
 
-- [ ] **T-27 · Encontrar los incidentes más parecidos** — RF-11, RF-13
+- [x] **T-27 · Encontrar los incidentes más parecidos** — RF-11, RF-13
   **Hecho cuando:** con incidentes sembrados, la búsqueda devuelve como mucho 3 casos, descarta los que no superan el umbral y excluye el propio incidente, los no resueltos y los no indexados; pytest con embeddings deterministas.
 
 - [ ] **T-28 · Generar la recomendación paso a paso** — RF-11
