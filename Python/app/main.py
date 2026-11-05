@@ -6,12 +6,17 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.api.analyses import router as analyses_router
 from app.api.classifications import router as classifications_router
 from app.api.embeddings import router as embeddings_router
 from app.api.health import router as health_router
 from app.clients.embedder import Embedder, EmbedderInfo
 from app.clients.groq_client import GroqClient, LlmClient
-from app.core.errors import AiUnavailableError, InvalidClassificationError
+from app.core.errors import (
+    AiUnavailableError,
+    InvalidClassificationError,
+    InvalidRecommendationError,
+)
 from app.repositories.embedding_repository import EmbeddingRepository
 from app.services.embedding_service import EmbeddingStore
 
@@ -55,12 +60,19 @@ def create_app(
     )  # guarda la ruta del enpoind que se encuentra en health.py
     app.include_router(classifications_router)
     app.include_router(embeddings_router)
+    app.include_router(analyses_router)
 
     @app.exception_handler(InvalidClassificationError)
     async def invalid_classification(
         _: Request, error: InvalidClassificationError
     ) -> JSONResponse:
         return _error(422, "INVALID_CLASSIFICATION", str(error))
+
+    @app.exception_handler(InvalidRecommendationError)
+    async def invalid_recommendation(
+        _: Request, error: InvalidRecommendationError
+    ) -> JSONResponse:
+        return _error(422, "INVALID_RECOMMENDATION", str(error))
 
     @app.exception_handler(AiUnavailableError)
     async def ai_unavailable(_: Request, error: AiUnavailableError) -> JSONResponse:

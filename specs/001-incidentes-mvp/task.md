@@ -98,7 +98,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-27 · Encontrar los incidentes más parecidos** — RF-11, RF-13
   **Hecho cuando:** con incidentes sembrados, la búsqueda devuelve como mucho 3 casos, descarta los que no superan el umbral y excluye el propio incidente, los no resueltos y los no indexados; pytest con embeddings deterministas.
 
-- [ ] **T-28 · Generar la recomendación paso a paso** — RF-11
+- [x] **T-28 · Generar la recomendación paso a paso** — RF-11
   **Hecho cuando:** `POST /ai/v1/analyses` devuelve pasos y referencias cuando hay casos similares, devuelve recomendación general avisando de que no hay casos previos cuando no los hay, y 422 si Groq responde sin ningún paso con texto; pytest de los tres caminos.
 
 ## Bloque 4 — Integración backend ↔ IA

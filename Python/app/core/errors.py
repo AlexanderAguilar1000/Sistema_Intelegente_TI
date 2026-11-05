@@ -4,3 +4,7 @@ class AiUnavailableError(Exception):
 
 class InvalidClassificationError(Exception):
     """Groq respondió algo que no cumple el catálogo (se traduce a 422)."""
+
+
+class InvalidRecommendationError(Exception):
+    """Groq no devolvió ningún paso con texto (se traduce a 422)."""

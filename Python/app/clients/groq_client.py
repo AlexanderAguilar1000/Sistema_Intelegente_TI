@@ -26,7 +26,8 @@ class GroqClient:
         self.model_name = os.getenv("GROQ_MODEL", "")
         self._client: Groq | None = None
 
-#le digo que clasifique  y que utilice groq  le mando el prompt y el rol del usuario 
+#le digo que se cargue el modelo de groq le paso lo que envia el usuario yel prompt que utiliza el sistema que es clasificar 
+# le doy roles  y solo lo conecto 
     def complete(self, system: str, user: str) -> str:
         try:
             response = self._groq().chat.completions.create(#Aca se conecta con groq
