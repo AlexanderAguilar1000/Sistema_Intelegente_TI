@@ -116,6 +116,14 @@ public class Incident {
         this.classificationStatus = ClassificationStatus.MANUALLY_CORRECTED;
     }
 
+    /** Fija la clasificación propuesta por la IA al registrar el incidente (RF-4). */
+    public void classifyByAi(IncidentType type, Priority priority, Area area) {
+        this.type = type;
+        this.priority = priority;
+        this.area = area;
+        this.classificationStatus = ClassificationStatus.AI_CLASSIFIED;
+    }
+
     /** Indica si {@code user} es el técnico asignado vigente del incidente (RF-9, RF-10). */
     //si hay algun asignado 
     //assignedTo es objeto de la clase User , entonces dice si no hay ninguna persona asignada al incidente  y si hay un asignado , pero el id del asignado no  o concuerda con el usuario que esta logeado actualmente

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.corporativoTI.SistemaInteligenteTI.ai.client.AiClient;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.Incident;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,9 @@ class IncidentControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
     @Autowired private IncidentRepository incidentRepository;
+
+    // IA simulada sin respuesta: el incidente queda pendiente sin depender del servicio real (T-30).
+    @MockitoBean private AiClient aiClient;
 
     private User supervisor() {
         return userRepository.findByUsername("laura.supervisora").orElseThrow();

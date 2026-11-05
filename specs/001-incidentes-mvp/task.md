@@ -103,10 +103,10 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 ## Bloque 4 — Integración backend ↔ IA
 
-- [ ] **T-29 · Hablar con el servicio de IA sin romperse** — RF-4, RF-11, RF-13, RNF-1, RNF-2, RNF-8
+- [x] **T-29 · Hablar con el servicio de IA sin romperse** — RF-4, RF-11, RF-13, RNF-1, RNF-2, RNF-8
   **Hecho cuando:** un test de contrato contra un servidor simulado cubre 200, 422, 503 y plazo agotado en los tres endpoints, y en ningún caso sube una excepción al controlador.
 
-- [ ] **T-30 · Clasificar el incidente al registrarlo** — RF-3, RF-4, RNF-1
+- [x] **T-30 · Clasificar el incidente al registrarlo** — RF-3, RF-4, RNF-1
   **Hecho cuando:** con la IA simulada respondiendo bien, el incidente queda clasificado en el mismo registro; si tarda más de 10 segundos o responde algo inválido, el incidente se guarda igualmente marcado como pendiente; tests de ambos caminos.
 
 - [ ] **T-31 · Reintentar la clasificación de un pendiente** — RF-4

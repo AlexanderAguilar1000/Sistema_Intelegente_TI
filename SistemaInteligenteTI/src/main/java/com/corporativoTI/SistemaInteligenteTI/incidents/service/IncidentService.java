@@ -1,5 +1,10 @@
 package com.corporativoTI.SistemaInteligenteTI.incidents.service;
 
+import com.corporativoTI.SistemaInteligenteTI.ai.client.AiClient;
+import com.corporativoTI.SistemaInteligenteTI.ai.dto.AiCatalog;
+import com.corporativoTI.SistemaInteligenteTI.ai.dto.ClassificationRequest;
+import com.corporativoTI.SistemaInteligenteTI.ai.dto.ClassificationResponse;
+import com.corporativoTI.SistemaInteligenteTI.ai.model.AiResult;
 import com.corporativoTI.SistemaInteligenteTI.audit.model.IncidentEventAction;
 import com.corporativoTI.SistemaInteligenteTI.audit.service.AuditService;
 import com.corporativoTI.SistemaInteligenteTI.catalog.model.Area;
@@ -31,6 +36,7 @@ import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.repository.UserRepository;
 import com.corporativoTI.SistemaInteligenteTI.users.service.RoleGuard;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -47,10 +53,12 @@ public class IncidentService {
     private final IncidentStateMachine stateMachine;
     private final RoleGuard roleGuard;
     private final AuditService auditService;
+    private final AiClient aiClient;
 
     /**
-     * Registra un incidente en estado Registrado y pendiente de clasificación. La clasificación
-     * con IA se incorpora en T-30; hasta entonces todo incidente nace pendiente.
+     * Registra un incidente en estado Registrado y lo clasifica con la IA en el mismo registro
+     * (RF-3, RF-4). Si la IA no contesta en 10 s, falla o responde algo fuera del catálogo, el
+     * incidente se guarda igualmente como pendiente de clasificación (D1, D11).
      */
     @Transactional
     public IncidentResponse registerIncident(User activeUser, CreateIncidentRequest request) {
@@ -67,8 +75,54 @@ public class IncidentService {
         incident.setCreatedAt(Instant.now());
         Incident saved = incidentRepository.save(incident);
         auditService.record(saved.getId(), IncidentEventAction.CREATED, activeUser);
+        classifyWithAi(saved);
 
         return toResponse(saved);
+    }
+
+    /**
+     * Pide la clasificación a la IA y, solo si trae los tres valores válidos del catálogo, la
+     * aplica. Cualquier otro resultado deja el incidente pendiente: nunca se propaga un fallo.
+     */
+    private void classifyWithAi(Incident incident) {
+        AiResult<ClassificationResponse> result =
+                aiClient.classify(
+                        new ClassificationRequest(
+                                incident.getId(),
+                                incident.getTitle(),
+                                incident.getDescription(),
+                                catalog()));
+        if (!(result instanceof AiResult.Success<ClassificationResponse> success)) {
+            return;
+        }
+        ClassificationResponse answer = success.value();
+        IncidentType type = toCatalogValue(IncidentType.class, answer.type());
+        Priority priority = toCatalogValue(Priority.class, answer.priority());
+        Area area = toCatalogValue(Area.class, answer.area());
+
+        //devuelve los datos
+        if (type != null && priority != null && area != null) {
+            incident.classifyByAi(type, priority, area);
+        }
+    }
+
+    private static AiCatalog catalog() {
+        return new AiCatalog(names(IncidentType.values()), names(Priority.values()), names(Area.values()));
+    }
+
+    private static List<String> names(Enum<?>[] values) {
+        return Arrays.stream(values).map(Enum::name).toList();
+    }
+
+    private static <E extends Enum<E>> E toCatalogValue(Class<E> catalog, String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(catalog, value.trim());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     /**

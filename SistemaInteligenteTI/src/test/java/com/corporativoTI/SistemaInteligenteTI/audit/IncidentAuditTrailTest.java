@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.corporativoTI.SistemaInteligenteTI.ai.client.AiClient;
 import com.corporativoTI.SistemaInteligenteTI.audit.model.IncidentEvent;
 import com.corporativoTI.SistemaInteligenteTI.audit.model.IncidentEventAction;
 import com.corporativoTI.SistemaInteligenteTI.audit.repository.IncidentEventRepository;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,9 @@ class IncidentAuditTrailTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
     @Autowired private IncidentEventRepository eventRepository;
+
+    // IA simulada sin respuesta: los incidentes nacen pendientes sin depender del servicio real (T-30).
+    @MockitoBean private AiClient aiClient;
 
     private User supervisor;
     private User otherSupervisor;
