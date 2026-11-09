@@ -109,7 +109,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-30 · Clasificar el incidente al registrarlo** — RF-3, RF-4, RNF-1
   **Hecho cuando:** con la IA simulada respondiendo bien, el incidente queda clasificado en el mismo registro; si tarda más de 10 segundos o responde algo inválido, el incidente se guarda igualmente marcado como pendiente; tests de ambos caminos.
 
-- [ ] **T-31 · Reintentar la clasificación de un pendiente** — RF-4
+- [x] **T-31 · Reintentar la clasificación de un pendiente** — RF-4
   **Hecho cuando:** `POST /api/incidents/{id}/classification/retry` deja el incidente clasificado si la IA responde bien y lo deja pendiente si vuelve a fallar; solo lo puede lanzar el supervisor; tests.
 
 - [ ] **T-32 · Incorporar al histórico el incidente resuelto** — RF-13

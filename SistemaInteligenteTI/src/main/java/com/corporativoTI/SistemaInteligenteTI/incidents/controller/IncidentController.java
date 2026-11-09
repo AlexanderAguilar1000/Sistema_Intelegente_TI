@@ -59,6 +59,12 @@ public class IncidentController {
         return incidentService.classifyManually(activeUser, id, request);
     }
 
+    @PostMapping("/{id}/classification/retry")
+    public IncidentDetailResponse retryClassification(
+            @ActiveUser User activeUser, @PathVariable Long id) {
+        return incidentService.retryClassification(activeUser, id);
+    }
+
     @PostMapping("/{id}/start")
     public IncidentDetailResponse startIncident(@ActiveUser User activeUser, @PathVariable Long id) {
         return incidentService.startIncident(activeUser, id);

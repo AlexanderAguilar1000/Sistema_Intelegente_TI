@@ -18,6 +18,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailRespon
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ResolveIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.ClassificationNotPendingException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
@@ -81,10 +82,41 @@ public class IncidentService {
     }
 
     /**
+     * Reintenta la clasificación con la IA de un incidente pendiente, solo el supervisor (RF-4). Si
+     * la IA responde con valores válidos queda clasificado; si vuelve a fallar sigue pendiente y la
+     * petición no falla (D11).
+     */
+    @Transactional
+    public IncidentDetailResponse retryClassification(User activeUser, Long id) {
+        roleGuard.requireSupervisor(activeUser);//verifica que el rol sea supervisor 
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));//extraigo el id del incidente 
+        if (incident.getStatus().isFinal()) { //no se puede clasificar un incidente con estado resueldo 
+            throw new IncidentClosedException(id);
+        }
+        if (incident.getClassificationStatus() != ClassificationStatus.PENDING) {//para clasificar un incidente debe estar con estado pendiente 
+            throw new ClassificationNotPendingException(id);
+        }
+        auditService.record(id, IncidentEventAction.CLASSIFICATION_RETRIED, activeUser);//guarda el intento de clasificación en la base de datos 
+        boolean classified = classifyWithAi(incident);//llama al metodo classifyWithAI que es el metodo que se encuentra en AIClient 
+                                                      //esta función se conecta coon python  y ahi clasifica
+        //Lo guarda en la base de datos  , si sale error lo guarda como pendiente  y muestra el error , si no guarda la clasificación 
+        auditService.record(
+                id,
+                classified
+                        ? IncidentEventAction.AI_CLASSIFIED
+                        : IncidentEventAction.CLASSIFICATION_FAILED,
+                null);
+        return toDetailResponse(incidentRepository.save(incident));//guarda en la base de datos  y devuelve este oobjeto json 
+    }
+
+    /**
      * Pide la clasificación a la IA y, solo si trae los tres valores válidos del catálogo, la
      * aplica. Cualquier otro resultado deja el incidente pendiente: nunca se propaga un fallo.
+     *
+     * @return {@code true} si el incidente quedó clasificado
      */
-    private void classifyWithAi(Incident incident) {
+    private boolean classifyWithAi(Incident incident) {
         AiResult<ClassificationResponse> result =
                 aiClient.classify(
                         new ClassificationRequest(
@@ -93,7 +125,7 @@ public class IncidentService {
                                 incident.getDescription(),
                                 catalog()));
         if (!(result instanceof AiResult.Success<ClassificationResponse> success)) {
-            return;
+            return false;
         }
         ClassificationResponse answer = success.value();
         IncidentType type = toCatalogValue(IncidentType.class, answer.type());
@@ -103,7 +135,9 @@ public class IncidentService {
         //devuelve los datos
         if (type != null && priority != null && area != null) {
             incident.classifyByAi(type, priority, area);
+            return true;
         }
+        return false;
     }
 
     private static AiCatalog catalog() {

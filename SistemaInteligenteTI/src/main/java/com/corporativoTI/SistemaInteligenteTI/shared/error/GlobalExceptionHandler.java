@@ -1,5 +1,6 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.ClassificationNotPendingException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
@@ -59,6 +60,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleIncidentNotClassified(IncidentNotClassifiedException ex) {
         return new ErrorResponse("INCIDENT_NOT_CLASSIFIED", ex.getMessage());
+    }
+
+    @ExceptionHandler(ClassificationNotPendingException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleClassificationNotPending(ClassificationNotPendingException ex) {
+        return new ErrorResponse("CLASSIFICATION_NOT_PENDING", ex.getMessage());
     }
 
     @ExceptionHandler(TechnicianAreaMismatchException.class)
