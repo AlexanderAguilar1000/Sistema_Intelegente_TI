@@ -112,7 +112,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-31 · Reintentar la clasificación de un pendiente** — RF-4
   **Hecho cuando:** `POST /api/incidents/{id}/classification/retry` deja el incidente clasificado si la IA responde bien y lo deja pendiente si vuelve a fallar; solo lo puede lanzar el supervisor; tests.
 
-- [ ] **T-32 · Incorporar al histórico el incidente resuelto** — RF-13
+- [x] **T-32 · Incorporar al histórico el incidente resuelto** — RF-13
   **Hecho cuando:** al resolver se pide la indexación y el incidente queda marcado como indexado; si la indexación falla, sigue Resuelto pero marcado sin indexar y no se pierde la solución; tests.
 
 - [ ] **T-33 · Reindexar un incidente que quedó fuera del histórico** — RF-13

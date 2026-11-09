@@ -89,6 +89,10 @@ public class Incident {
     @Column(name = "closure_reason", length = 25)
     private ClosureReason closureReason;
 
+    /** Verdadero cuando el incidente resuelto ya está en el histórico consultable (RF-13). */
+    @Column(nullable = false)
+    private boolean indexed;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 

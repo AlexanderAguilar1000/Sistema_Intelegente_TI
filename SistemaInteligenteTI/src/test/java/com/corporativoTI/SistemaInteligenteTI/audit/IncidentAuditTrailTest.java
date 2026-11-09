@@ -139,8 +139,11 @@ class IncidentAuditTrailTest {
                         IncidentEventAction.ASSIGNED,
                         IncidentEventAction.REASSIGNED,
                         IncidentEventAction.STARTED,
-                        IncidentEventAction.RESOLVED);
-        assertThat(events).extracting(event -> event.getPerformedBy().getId())
+                        IncidentEventAction.RESOLVED,
+                        // La indexación (T-32) la hace el sistema; la IA simulada no responde.
+                        IncidentEventAction.INDEXING_FAILED);
+        assertThat(events.get(6).getPerformedBy()).isNull();
+        assertThat(events.subList(0, 6)).extracting(event -> event.getPerformedBy().getId())
                 .containsExactly(
                         supervisor.getId(),
                         supervisor.getId(),

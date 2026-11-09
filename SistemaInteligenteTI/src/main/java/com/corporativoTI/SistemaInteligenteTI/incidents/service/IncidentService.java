@@ -4,6 +4,8 @@ import com.corporativoTI.SistemaInteligenteTI.ai.client.AiClient;
 import com.corporativoTI.SistemaInteligenteTI.ai.dto.AiCatalog;
 import com.corporativoTI.SistemaInteligenteTI.ai.dto.ClassificationRequest;
 import com.corporativoTI.SistemaInteligenteTI.ai.dto.ClassificationResponse;
+import com.corporativoTI.SistemaInteligenteTI.ai.dto.EmbeddingRequest;
+import com.corporativoTI.SistemaInteligenteTI.ai.dto.EmbeddingResponse;
 import com.corporativoTI.SistemaInteligenteTI.ai.model.AiResult;
 import com.corporativoTI.SistemaInteligenteTI.audit.model.IncidentEventAction;
 import com.corporativoTI.SistemaInteligenteTI.audit.service.AuditService;
@@ -316,7 +318,33 @@ public class IncidentService {
         IncidentStatus target = stateMachine.transition(incident.getStatus(), IncidentAction.RESOLVE);
         incident.resolve(solution, target, Instant.now());//llama a este metodo para verificar si cumple con la cantidad minima de caracteres
         auditService.record(id, IncidentEventAction.RESOLVED, activeUser);
+        indexInHistory(incident);
         return toDetailResponse(incidentRepository.save(incident));//lo guarda en la base de datos y lo convierte a to detailresponse para que el backend se lo pase a angular . 
+    }
+
+    /**
+     * Pide al servicio de IA incorporar el incidente resuelto al histórico (RF-13). Si falla, el
+     * incidente sigue Resuelto con su solución y queda marcado sin indexar (RNF-8, D11).
+     */
+    private void indexInHistory(Incident incident) {
+        AiResult<EmbeddingResponse> result =
+                aiClient.index(
+                        new EmbeddingRequest(
+                                incident.getId(),
+                                incident.getTitle(),
+                                incident.getDescription(),
+                                incident.getSolution(),
+                                incident.getType().name(),
+                                incident.getArea().name()));
+        boolean indexed =
+                result instanceof AiResult.Success<EmbeddingResponse> success
+                        && success.value() != null
+                        && success.value().indexed();
+        incident.setIndexed(indexed);
+        auditService.record(
+                incident.getId(),
+                indexed ? IncidentEventAction.INDEXED : IncidentEventAction.INDEXING_FAILED,
+                null);
     }
 
     /**
