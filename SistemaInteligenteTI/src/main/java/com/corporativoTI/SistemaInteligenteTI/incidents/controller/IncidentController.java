@@ -9,6 +9,8 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentDetailRespon
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentListResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentResponse;
 import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ResolveIncidentRequest;
+import com.corporativoTI.SistemaInteligenteTI.incidents.dto.IncidentAnalysisResponse;
+import com.corporativoTI.SistemaInteligenteTI.incidents.service.IncidentAnalysisService;
 import com.corporativoTI.SistemaInteligenteTI.incidents.service.IncidentService;
 import com.corporativoTI.SistemaInteligenteTI.users.model.User;
 import com.corporativoTI.SistemaInteligenteTI.users.web.ActiveUser;
@@ -32,6 +34,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class IncidentController {
 
     private final IncidentService incidentService;
+    private final IncidentAnalysisService incidentAnalysisService;
+
+    @PostMapping("/{id}/analysis")
+    public IncidentAnalysisResponse analyzeIncident(
+            @ActiveUser User activeUser, @PathVariable Long id) {
+        return incidentAnalysisService.analyze(activeUser, id);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

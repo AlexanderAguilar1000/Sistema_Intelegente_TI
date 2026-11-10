@@ -1,5 +1,7 @@
 package com.corporativoTI.SistemaInteligenteTI.shared.error;
 
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.AnalysisFailedException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.AnalysisInProgressException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.ClassificationNotPendingException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
@@ -17,6 +19,7 @@ import com.corporativoTI.SistemaInteligenteTI.users.exception.RoleNotAllowedExce
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UnknownActiveUserException;
 import com.corporativoTI.SistemaInteligenteTI.users.exception.UsernameAlreadyExistsException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -73,6 +76,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleClassificationNotPending(ClassificationNotPendingException ex) {
         return new ErrorResponse("CLASSIFICATION_NOT_PENDING", ex.getMessage());
+    }
+
+    @ExceptionHandler(AnalysisInProgressException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleAnalysisInProgress(AnalysisInProgressException ex) {
+        return new ErrorResponse("ANALYSIS_IN_PROGRESS", ex.getMessage());
+    }
+
+    /** Fallo de la IA en el análisis (RF-11): 503 si no responde, 502 si responde algo inválido. */
+    @ExceptionHandler(AnalysisFailedException.class)
+    public ResponseEntity<ErrorResponse> handleAnalysisFailed(AnalysisFailedException ex) {
+        HttpStatus status = ex.isUnavailable() ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY;
+        String code = ex.isUnavailable() ? "AI_UNAVAILABLE" : "AI_INVALID_RESPONSE";
+        return ResponseEntity.status(status).body(new ErrorResponse(code, ex.getMessage()));
     }
 
     @ExceptionHandler(TechnicianAreaMismatchException.class)

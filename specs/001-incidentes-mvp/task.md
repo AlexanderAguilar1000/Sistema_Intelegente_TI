@@ -118,7 +118,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-33 · Reindexar un incidente que quedó fuera del histórico** — RF-13
   **Hecho cuando:** `POST /api/incidents/{id}/index/retry` lo marca como indexado; mientras esté sin indexar no aparece como caso similar; tests.
 
-- [ ] **T-34 · Analizar con IA desde el backend** — RF-11
+- [x] **T-34 · Analizar con IA desde el backend** — RF-11
   **Hecho cuando:** `POST /api/incidents/{id}/analysis` devuelve pasos y referencias al técnico asignado; el supervisor recibe 403; un segundo análisis mientras hay uno en curso recibe 409; un fallo de la IA devuelve error sin alterar el incidente; tests de los cuatro casos.
 
 ## Bloque 5 — Frontend Angular

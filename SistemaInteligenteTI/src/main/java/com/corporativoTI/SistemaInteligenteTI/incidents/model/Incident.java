@@ -93,6 +93,10 @@ public class Incident {
     @Column(nullable = false)
     private boolean indexed;
 
+    /** Instante del análisis con IA en curso; nulo si no hay ninguno (RF-11, D9). */
+    @Column(name = "analysis_started_at")
+    private Instant analysisStartedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -134,6 +138,21 @@ public class Incident {
     //el sistema lo detecta y devuelve error ( Si la persona asignada al incidente es la misma que la persona que esta logeada devuelve true )
     public boolean isAssignedTo(User user) {
         return assignedTo != null && assignedTo.getId().equals(user.getId());
+    }
+
+    /** Indica si hay un análisis vigente: iniciado hace menos que {@code expiry} (RF-11, D9). */
+    public boolean isAnalysisInProgress(Instant now, java.time.Duration expiry) {
+        return analysisStartedAt != null && analysisStartedAt.plus(expiry).isAfter(now);
+    }
+
+    /** Marca el comienzo de un análisis con IA (RF-11, D9). */
+    public void startAnalysis(Instant now) {
+        this.analysisStartedAt = now;
+    }
+
+    /** Libera la marca de análisis en curso, haya terminado bien o mal (RF-11). */
+    public void finishAnalysis() {
+        this.analysisStartedAt = null;
     }
 
     /** Inicia el trabajo (RF-10). {@code newStatus} lo decide la máquina de estados. */
