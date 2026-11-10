@@ -115,7 +115,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-32 · Incorporar al histórico el incidente resuelto** — RF-13
   **Hecho cuando:** al resolver se pide la indexación y el incidente queda marcado como indexado; si la indexación falla, sigue Resuelto pero marcado sin indexar y no se pierde la solución; tests.
 
-- [ ] **T-33 · Reindexar un incidente que quedó fuera del histórico** — RF-13
+- [x] **T-33 · Reindexar un incidente que quedó fuera del histórico** — RF-13
   **Hecho cuando:** `POST /api/incidents/{id}/index/retry` lo marca como indexado; mientras esté sin indexar no aparece como caso similar; tests.
 
 - [ ] **T-34 · Analizar con IA desde el backend** — RF-11

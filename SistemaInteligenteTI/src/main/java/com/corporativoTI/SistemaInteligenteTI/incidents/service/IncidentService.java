@@ -23,6 +23,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.dto.ResolveIncidentReque
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.ClassificationNotPendingException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotResolvedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
@@ -323,10 +324,32 @@ public class IncidentService {
     }
 
     /**
+     * Reintenta la indexación de un incidente resuelto que quedó fuera del histórico, solo el
+     * supervisor (RF-13). La indexación es idempotente en el servicio de IA, así que repetirla es
+     * segura. Si vuelve a fallar, el incidente sigue Resuelto y sin indexar.
+     */
+    @Transactional
+    public IncidentDetailResponse retryIndexing(User activeUser, Long id) {
+        roleGuard.requireSupervisor(activeUser);//revisa que es el supervisor el que esta en la sección 
+        //extraigo el incidente 
+        Incident incident =
+                incidentRepository.findById(id).orElseThrow(() -> new IncidentNotFoundException(id));
+        //el incidente miro que el estado no esta en estado resuelto 
+        if (incident.getStatus() != IncidentStatus.RESOLVED) {
+            throw new IncidentNotResolvedException(id);
+        }
+        indexInHistory(incident);//llamo al metodo 
+        return toDetailResponse(incidentRepository.save(incident));
+    }
+
+    /**
      * Pide al servicio de IA incorporar el incidente resuelto al histórico (RF-13). Si falla, el
      * incidente sigue Resuelto con su solución y queda marcado sin indexar (RNF-8, D11).
      */
     private void indexInHistory(Incident incident) {
+        //aqui cuando resuelve un incidente llama ala función index  y esta función esta en la clase 
+        //AICLIENT  y aqui se conecta con python  y ahi lo convierte en vectores numericos y lo guarda en la base de datos 
+
         AiResult<EmbeddingResponse> result =
                 aiClient.index(
                         new EmbeddingRequest(
@@ -336,11 +359,13 @@ public class IncidentService {
                                 incident.getSolution(),
                                 incident.getType().name(),
                                 incident.getArea().name()));
+        //extrae la respuesta de la IA                         
         boolean indexed =
                 result instanceof AiResult.Success<EmbeddingResponse> success
                         && success.value() != null
                         && success.value().indexed();
-        incident.setIndexed(indexed);
+        incident.setIndexed(indexed);//claro lo unico que hace es cambiar el valor si es true es que hasido convertido a base de datos vectorial 
+        //sino ha salido un error 
         auditService.record(
                 incident.getId(),
                 indexed ? IncidentEventAction.INDEXED : IncidentEventAction.INDEXING_FAILED,
@@ -402,7 +427,8 @@ public class IncidentService {
                 incident.getCreatedAt(),
                 incident.getAssignedAt(),
                 incident.getStartedAt(),
-                incident.getClosedAt());
+                incident.getClosedAt(),
+                incident.isIndexed());
     }
 
     private static IncidentResponse toResponse(Incident incident) {

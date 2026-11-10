@@ -4,6 +4,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.exception.Classification
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotClassifiedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotResolvedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.SolutionTooShortException;
@@ -60,6 +61,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleIncidentNotClassified(IncidentNotClassifiedException ex) {
         return new ErrorResponse("INCIDENT_NOT_CLASSIFIED", ex.getMessage());
+    }
+
+    @ExceptionHandler(IncidentNotResolvedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleIncidentNotResolved(IncidentNotResolvedException ex) {
+        return new ErrorResponse("INCIDENT_NOT_RESOLVED", ex.getMessage());
     }
 
     @ExceptionHandler(ClassificationNotPendingException.class)

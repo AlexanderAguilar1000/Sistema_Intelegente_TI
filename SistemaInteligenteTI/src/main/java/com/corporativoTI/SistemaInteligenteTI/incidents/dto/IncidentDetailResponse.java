@@ -20,4 +20,5 @@ public record IncidentDetailResponse(
         Instant createdAt,
         Instant assignedAt,
         Instant startedAt,
-        Instant closedAt) {}
+        Instant closedAt,
+        boolean indexed) {}

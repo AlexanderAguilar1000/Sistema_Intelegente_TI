@@ -65,6 +65,11 @@ public class IncidentController {
         return incidentService.retryClassification(activeUser, id);
     }
 
+    @PostMapping("/{id}/index/retry")
+    public IncidentDetailResponse retryIndexing(@ActiveUser User activeUser, @PathVariable Long id) {
+        return incidentService.retryIndexing(activeUser, id);
+    }
+
     @PostMapping("/{id}/start")
     public IncidentDetailResponse startIncident(@ActiveUser User activeUser, @PathVariable Long id) {
         return incidentService.startIncident(activeUser, id);
