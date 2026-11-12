@@ -34,6 +34,11 @@ export class IncidentDetailPageComponent {
   assignOpen = signal(false);
   resolveOpen = signal(false);
   closeOpen = signal(false);
+  // Deben declararse antes de `loaded`: su tap las usa en cuanto se suscribe.
+  aiOpen = signal(false);
+  analyzing = signal(false);
+  analysis = signal<IncidentAnalysis | null>(null);
+  analysisError = signal<string | null>(null);
   /** Detalle devuelto por el PATCH de clasificación; tiene prioridad sobre el cargado hasta cambiar de ruta. */
   private updated = signal<IncidentDetail | null>(null);
 
@@ -67,7 +72,6 @@ export class IncidentDetailPageComponent {
     const user = this.auth.activeUser();
     return user?.role === 'Técnico' && !!user && user.id === this.incident()?.assignedTo;
   });
-  aiOpen = signal(false);
   starting = signal(false);
   retrying = signal(false);
   actionError = signal<string | null>(null);
@@ -78,9 +82,6 @@ export class IncidentDetailPageComponent {
   canResolve = computed(() => this.isTech() && this.status() === 'En progreso');
   canClose = computed(() => this.canAnalyze());
 
-  analyzing = signal(false);
-  analysis = signal<IncidentAnalysis | null>(null);
-  analysisError = signal<string | null>(null);
 
   startWork(): void {
     const inc = this.incident();

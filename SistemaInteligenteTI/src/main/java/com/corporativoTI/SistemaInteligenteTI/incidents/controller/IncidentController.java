@@ -42,6 +42,7 @@ public class IncidentController {
         return incidentAnalysisService.analyze(activeUser, id);
     }
 
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public IncidentResponse registerIncident(

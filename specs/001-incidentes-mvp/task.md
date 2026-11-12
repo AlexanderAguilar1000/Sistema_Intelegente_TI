@@ -138,16 +138,16 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-39 · Dar de alta un técnico desde la interfaz** — RF-2
   **Hecho cuando:** el supervisor crea un técnico eligiendo su área y ese técnico aparece después en el desplegable de asignación de esa área.
 
-- [ ] **T-40 · Corregir la clasificación desde la interfaz** — RF-4, RF-6
+- [x] **T-40 · Corregir la clasificación desde la interfaz** — RF-4, RF-6
   **Hecho cuando:** el supervisor puede cambiar tipo, prioridad y área eligiendo del catálogo, y lanzar el reintento de clasificación en un incidente pendiente, viendo el resultado en pantalla.
 
-- [ ] **T-41 · Asignar y reasignar desde la interfaz** — RF-7
+- [x] **T-41 · Asignar y reasignar desde la interfaz** — RF-7
   **Hecho cuando:** el desplegable de técnicos solo ofrece los del área del incidente, la asignación se refleja en el listado, y un incidente pendiente de clasificación no ofrece la acción de asignar.
 
 - [ ] **T-42 · Trabajar el incidente como técnico** — RF-10, RF-12, RF-14
   **Hecho cuando:** el técnico puede iniciar, resolver escribiendo la solución y cerrar sin solución eligiendo motivo, y la interfaz solo ofrece cada acción cuando el estado la permite.
 
-- [ ] **T-43 · Pedir la recomendación de la IA en pantalla** — RF-11
+- [X] **T-43 · Pedir la recomendación de la IA en pantalla** — RF-11
   **Hecho cuando:** al pulsar "Analizar con IA" se ve el aviso de procesando, luego los pasos numerados y los casos usados como referencia; si no hay casos aparece el aviso de recomendación general, y si la IA falla aparece el error con opción de reintentar.
 
 ## Bloque 6 — Cierre
