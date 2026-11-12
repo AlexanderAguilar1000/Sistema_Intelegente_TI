@@ -12,10 +12,9 @@ import { ClassificationDialogComponent } from '../../components/classification-d
 import { CloseDialogComponent } from '../../components/close-dialog/close-dialog.component';
 import { ResolveDialogComponent } from '../../components/resolve-dialog/resolve-dialog.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
-import { IncidentDetail, IncidentStatus } from '../../models/incident.model';
+import { IncidentAnalysis, IncidentDetail, IncidentStatus } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { IncidentService } from '../../services/incident.service';
-import { getSimilarCases } from '../../utils/similar-cases.util';
 
 @Component({
   selector: 'app-incident-detail-page',
@@ -45,6 +44,9 @@ export class IncidentDetailPageComponent {
       tap(() => {
         this.error.set(null);
         this.updated.set(null);
+        this.aiOpen.set(false);
+        this.analysis.set(null);
+        this.analysisError.set(null);
       }),
       switchMap((id) =>
         this.service.getDetail(id).pipe(
@@ -67,6 +69,7 @@ export class IncidentDetailPageComponent {
   });
   aiOpen = signal(false);
   starting = signal(false);
+  retrying = signal(false);
   actionError = signal<string | null>(null);
 
   status = computed<IncidentStatus | undefined>(() => this.incident()?.status);
@@ -75,11 +78,9 @@ export class IncidentDetailPageComponent {
   canResolve = computed(() => this.isTech() && this.status() === 'En progreso');
   canClose = computed(() => this.canAnalyze());
 
-  /** Casos de referencia simulados; vendrán del servicio de IA. */
-  similarCases = computed(() => {
-    const inc = this.incident();
-    return inc ? getSimilarCases(inc) : [];
-  });
+  analyzing = signal(false);
+  analysis = signal<IncidentAnalysis | null>(null);
+  analysisError = signal<string | null>(null);
 
   startWork(): void {
     const inc = this.incident();
@@ -98,8 +99,40 @@ export class IncidentDetailPageComponent {
     });
   }
 
+  retryClassification(): void {
+    const inc = this.incident();
+    if (!inc || this.retrying()) return;
+    this.retrying.set(true);
+    this.actionError.set(null);
+    this.service.retryClassification(inc.id).subscribe({
+      next: (detail) => {
+        this.updated.set(detail);
+        this.retrying.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.actionError.set(err.error?.message ?? 'No se pudo reintentar la clasificación con IA.');
+        this.retrying.set(false);
+      },
+    });
+  }
+
   analyzeWithAi(): void {
+    const inc = this.incident();
+    if (!inc || this.analyzing()) return;
     this.aiOpen.set(true);
+    this.analyzing.set(true);
+    this.analysisError.set(null);
+    this.service.analyzeIncident(inc.id).subscribe({
+      next: (analysis) => {
+        this.analysis.set(analysis);
+        this.analyzing.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.analysis.set(null);
+        this.analysisError.set(err.error?.message ?? 'No se pudo obtener el análisis de la IA.');
+        this.analyzing.set(false);
+      },
+    });
   }
 
   constructor() {

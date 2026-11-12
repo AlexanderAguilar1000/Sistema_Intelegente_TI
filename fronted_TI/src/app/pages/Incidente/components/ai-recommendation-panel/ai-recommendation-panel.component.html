@@ -22,16 +22,21 @@
       </svg>
       <p>Pulsa “Analizar con IA” para obtener pasos de diagnóstico y casos similares.</p>
     </div>
-  } @else {
+  } @else if (loading()) {
+    <div class="locked"><p>Analizando el incidente con IA…</p></div>
+  } @else if (error(); as msg) {
+    <div class="locked"><p role="alert">{{ msg }}</p></div>
+  } @else if (analysis(); as a) {
     <div class="opened">
-      <p class="intro">Basado en análisis de patrones y casos similares:</p>
+      <p class="intro">
+        {{ a.grounded ? 'Basado en casos similares ya resueltos:' : 'No hay casos similares suficientes; sugerencia general de la IA:' }}
+      </p>
       <ol class="steps">
-        @for (step of steps; track step.title; let i = $index) {
+        @for (step of a.steps; track $index) {
           <li>
-            <span class="num">{{ i + 1 }}</span>
+            <span class="num">{{ $index + 1 }}</span>
             <div>
-              <p class="step-title">{{ step.title }}</p>
-              <p class="step-desc">{{ step.description }}</p>
+              <p class="step-title">{{ step }}</p>
             </div>
           </li>
         }
@@ -39,12 +44,16 @@
       <hr />
 
       <p class="similar-title">
-        <strong>Casos similares usados</strong> ({{ cases().length }}) · pulsa un caso para ver el detalle
+        <strong>Casos similares usados</strong> ({{ a.references.length }})
       </p>
-      @if (cases().length) {
+      @if (a.references.length) {
         <div class="cases">
-          @for (c of cases(); track c.code) {
-            <app-similar-case-item [case]="c" [open]="openCase() === c.code" (toggle)="toggle(c.code)" />
+          @for (r of a.references; track r.incidentId) {
+            <div class="ref">
+              <span class="ref-title">{{ r.title }}</span>
+              <span class="ref-id">Incidente #{{ r.incidentId }}</span>
+              <span class="ref-score">{{ percent(r.score) }}%</span>
+            </div>
           }
         </div>
       } @else {

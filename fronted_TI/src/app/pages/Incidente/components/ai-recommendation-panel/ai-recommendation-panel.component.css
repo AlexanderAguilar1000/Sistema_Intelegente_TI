@@ -21,6 +21,10 @@ hr { border: 0; border-top: 1px solid #e3e9f1; margin: 0 0 20px; }
 .similar-title { margin: 0 0 14px; font-size: 13px; color: #637083; }
 .similar-title strong { color: #1d2733; font-weight: 600; }
 .cases { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.ref { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid #e3e9f1; border-radius: 10px; }
+.ref-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; color: #1d2733; }
+.ref-id { font-size: 12px; color: #8a96a8; }
+.ref-score { font-size: 13px; font-weight: 600; color: #1768d9; }
 .no-cases { margin: 0 0 22px; font-size: 13px; color: #8a96a8; }
 .num { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; background: #1768d9; color: #fff; font-size: 13px; font-weight: 600; }
 .step-title { margin: 0; font-size: 14px; font-weight: 600; color: #1d2733; }

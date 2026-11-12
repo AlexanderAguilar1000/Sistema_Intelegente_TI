@@ -126,7 +126,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-35 · Elegir con qué usuario se trabaja** — RF-1
   **Hecho cuando:** en el navegador se puede seleccionar un usuario de la lista, el menú cambia según su rol, y todas las peticiones salen con su `X-User-Id`; cambiar de usuario actualiza lo que se ve sin recargar.
 
-- [ ] **T-36 · Ver y filtrar los incidentes** — RF-8
+- [x] **T-36 · Ver y filtrar los incidentes** — RF-8
   **Hecho cuando:** el supervisor ve todos los incidentes y el técnico solo los suyos, el filtro por prioridad funciona en pantalla y una lista sin resultados muestra el aviso correspondiente.
 
 - [x] **T-37 · Registrar un incidente desde la interfaz** — RF-3, RNF-4

@@ -5,6 +5,7 @@ import {
   ClassificationValues,
   ClassifyIncidentBody,
   Incident,
+  IncidentAnalysis,
   IncidentApiResponse,
   IncidentDetail,
   IncidentDetailApiResponse,
@@ -87,6 +88,34 @@ export class IncidentService {
       map(toIncidentDetail),
       tap((detail) =>
         this.incidents.update((list) => list.map((i) => (i.id === id ? { ...i, status: detail.status } : i))),
+      ),
+    );
+  }
+
+  /** POST /api/incidents/{id}/analysis: pasos de diagnóstico y casos similares generados por IA. */
+  analyzeIncident(id: number): Observable<IncidentAnalysis> {
+    return this.http.post<IncidentAnalysis>(`/api/incidents/${id}/analysis`, {});
+  }
+
+  /** POST /api/incidents/{id}/classification/retry: reintenta la clasificación con IA. Devuelve el detalle actualizado. */
+  retryClassification(id: number): Observable<IncidentDetail> {
+    return this.http.post<IncidentDetailApiResponse>(`/api/incidents/${id}/classification/retry`, {}).pipe(
+      map(toIncidentDetail),
+      tap((detail) =>
+        this.incidents.update((list) =>
+          list.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  status: detail.status,
+                  type: detail.type,
+                  priority: detail.priority,
+                  area: detail.area,
+                  pendingClassification: detail.pendingClassification,
+                }
+              : i,
+          ),
+        ),
       ),
     );
   }

@@ -79,21 +79,18 @@ export interface IncidentDetail extends Incident {
   closedAt?: string;
 }
 
-/** Incidente ya resuelto que la IA usa como referencia en el panel de diagnóstico. */
-export interface SimilarCase {
-  /** Código visible, formato INC-AAAA-NNNN. */
-  code: string;
+/** Incidente similar usado como referencia (POST /api/incidents/{id}/analysis). `score` va de 0 a 1. */
+export interface AnalysisReference {
+  incidentId: number;
   title: string;
-  /** Porcentaje 0-100. */
-  similarity: number;
-  type: IncidentType;
-  priority: Priority;
-  area: TechArea;
-  status: IncidentStatus;
-  description: string;
-  solution: string;
-  resolvedBy: string;
-  resolvedAt: string;
+  score: number;
+}
+
+/** Respuesta de POST /api/incidents/{id}/analysis. `grounded` = la IA se apoyó en casos similares reales. */
+export interface IncidentAnalysis {
+  grounded: boolean;
+  steps: string[];
+  references: AnalysisReference[];
 }
 
 /** Cuerpo de PATCH /api/incidents/{id}/classification (códigos de catálogo del backend). */
