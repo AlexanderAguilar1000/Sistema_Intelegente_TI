@@ -38,8 +38,11 @@ h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.04em; color
 .btn-ai { background: #f3f7fd; color: #1256b5; border-color: #cfddf4; }
 .btn-ai svg { color: #1768d9; }
 .btn-ai:hover, .btn-ai.active { background: #eaf1fd; border-color: #a9c4ef; }
-.btn-ghost { background: transparent; color: #637083; }
-.btn-ghost:hover { background: #fdf1f1; color: #c62f2f; border-color: #f3d0d0; }
+/* Acción destructiva secundaria: borde y texto rojos siempre visibles, relleno al pasar el mouse. */
+.btn-danger { background: #fff; color: #c62f2f; border-color: #efc2c2; }
+.btn-danger svg { color: #d34040; }
+.btn-danger:hover { background: #fdf1f1; border-color: #e29a9a; color: #a82424; box-shadow: 0 1px 2px #c62f2f1f; }
+.btn-danger:focus-visible { box-shadow: 0 0 0 3px #d3404040; }
 .divider { width: 1px; height: 24px; background: #dfe7f1; margin: 0 2px; }
 
 .detail-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: stretch; }

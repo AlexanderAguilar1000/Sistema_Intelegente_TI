@@ -10,6 +10,7 @@
 ## MODULO NUEVO: 
 
 - Moduloo bitacoras se podria desarrollar . 
+- Dashboard o reportes (puede ser)
 
 
 # Pediente cuando regrese 
