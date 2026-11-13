@@ -93,6 +93,15 @@ export interface IncidentAnalysis {
   references: AnalysisReference[];
 }
 
+/** Motivos de cierre sin solución; coinciden con el enum ClosureReason del backend. */
+export type ClosureReason = 'DUPLICATE' | 'NOT_REPRODUCIBLE' | 'DISCARDED';
+
+export const CLOSURE_REASONS: { value: ClosureReason; label: string; description: string }[] = [
+  { value: 'DUPLICATE', label: 'Duplicado', description: 'Ya existe otro incidente que reporta el mismo problema.' },
+  { value: 'NOT_REPRODUCIBLE', label: 'No reproducible', description: 'No fue posible reproducir el problema reportado.' },
+  { value: 'DISCARDED', label: 'Descartado', description: 'El reporte no procede o ya no es necesario atenderlo.' },
+];
+
 /** Cuerpo de PATCH /api/incidents/{id}/classification (códigos de catálogo del backend). */
 export interface ClassifyIncidentBody {
   type: string;

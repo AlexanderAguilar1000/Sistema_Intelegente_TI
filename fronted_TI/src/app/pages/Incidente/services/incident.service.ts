@@ -4,6 +4,7 @@ import { Observable, map, tap } from 'rxjs';
 import {
   ClassificationValues,
   ClassifyIncidentBody,
+  ClosureReason,
   Incident,
   IncidentAnalysis,
   IncidentApiResponse,
@@ -83,7 +84,7 @@ export class IncidentService {
   }
 
   /** POST /api/incidents/{id}/closure: solo el técnico asignado. Devuelve el detalle actualizado (Cerrado sin solución). */
-  closeWithoutSolution(id: number, reason: string): Observable<IncidentDetail> {
+  closeWithoutSolution(id: number, reason: ClosureReason): Observable<IncidentDetail> {
     return this.http.post<IncidentDetailApiResponse>(`/api/incidents/${id}/closure`, { reason }).pipe(
       map(toIncidentDetail),
       tap((detail) =>

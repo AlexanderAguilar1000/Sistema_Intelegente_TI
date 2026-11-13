@@ -14,15 +14,18 @@
       </header>
 
       <div class="body">
-        <label for="close-reason">Motivo del cierre</label>
-        <textarea
-          id="close-reason"
-          rows="6"
-          placeholder="Explica por qué el incidente se cierra sin solución"
-          [ngModel]="reason()"
-          (ngModelChange)="reason.set($event)"
-          [disabled]="saving()"
-        ></textarea>
+        <div role="radiogroup" aria-labelledby="close-reason-label" class="options">
+          <span id="close-reason-label" class="label">Motivo del cierre</span>
+          @for (r of reasons; track r.value) {
+            <label class="option" [class.selected]="reason() === r.value">
+              <input type="radio" name="close-reason" [value]="r.value" [checked]="reason() === r.value" [disabled]="saving()" (change)="reason.set(r.value)" />
+              <span class="option-text">
+                <span class="option-title">{{ r.label }}</span>
+                <span class="option-desc">{{ r.description }}</span>
+              </span>
+            </label>
+          }
+        </div>
 
         @if (submitError()) {
           <small class="error" role="alert">{{ submitError() }}</small>
@@ -31,7 +34,7 @@
 
       <footer class="footer">
         <button type="button" class="btn-outline" (click)="close()" [disabled]="saving()">Cancelar</button>
-        <button type="button" class="btn-primary" (click)="submit()" [disabled]="!reason().trim() || saving()">
+        <button type="button" class="btn-primary" (click)="submit()" [disabled]="!reason() || saving()">
           {{ saving() ? 'Registrando…' : 'Registrar' }}
         </button>
       </footer>

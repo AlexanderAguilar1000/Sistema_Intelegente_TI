@@ -144,7 +144,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [x] **T-41 · Asignar y reasignar desde la interfaz** — RF-7
   **Hecho cuando:** el desplegable de técnicos solo ofrece los del área del incidente, la asignación se refleja en el listado, y un incidente pendiente de clasificación no ofrece la acción de asignar.
 
-- [ ] **T-42 · Trabajar el incidente como técnico** — RF-10, RF-12, RF-14
+- [x] **T-42 · Trabajar el incidente como técnico** — RF-10, RF-12, RF-14
   **Hecho cuando:** el técnico puede iniciar, resolver escribiendo la solución y cerrar sin solución eligiendo motivo, y la interfaz solo ofrece cada acción cuando el estado la permite.
 
 - [X] **T-43 · Pedir la recomendación de la IA en pantalla** — RF-11

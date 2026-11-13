@@ -1,13 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { IncidentDetail } from '../../models/incident.model';
+import { CLOSURE_REASONS, ClosureReason, IncidentDetail } from '../../models/incident.model';
 import { IncidentService } from '../../services/incident.service';
 
 @Component({
   selector: 'app-close-dialog',
   standalone: true,
-  imports: [FormsModule],
   templateUrl: './close-dialog.component.html',
   styleUrl: './close-dialog.component.css'
 })
@@ -20,7 +18,8 @@ export class CloseDialogComponent {
   /** Detalle devuelto por el backend tras cerrar sin solución. */
   saved = output<IncidentDetail>();
 
-  reason = signal('');
+  readonly reasons = CLOSURE_REASONS;
+  reason = signal<ClosureReason | null>(null);
   saving = signal(false);
   submitError = signal<string | null>(null);
 
@@ -28,7 +27,7 @@ export class CloseDialogComponent {
     // Cada vez que se abre, parte con el formulario limpio.
     effect(() => {
       if (!this.open()) return;
-      this.reason.set('');
+      this.reason.set(null);
       this.submitError.set(null);
     });
   }
@@ -39,7 +38,7 @@ export class CloseDialogComponent {
   }
 
   submit() {
-    const reason = this.reason().trim();
+    const reason = this.reason();
     if (!reason || this.saving()) return;
     this.saving.set(true);
     this.submitError.set(null);

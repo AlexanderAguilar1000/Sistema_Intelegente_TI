@@ -31,14 +31,20 @@ h2 { margin: 0; font-size: 19px; font-weight: 600; color: #1d2733; }
 .close:hover { background: #f3f7fd; }
 
 .body { display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 24px; }
-label { font-size: 14px; font-weight: 500; color: #1d2733; }
-textarea {
-  width: 100%; box-sizing: border-box; resize: vertical;
-  padding: 10px 12px;
-  border: 1px solid #d9e0ea; border-radius: 8px;
-  font: inherit; font-size: 14px; color: #1d2733;
+.options { display: flex; flex-direction: column; gap: 8px; }
+.label { font-size: 14px; font-weight: 500; color: #1d2733; }
+.option {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d9e0ea; border-radius: 10px;
+  cursor: pointer;
 }
-textarea:focus { outline: 2px solid #1768d9; outline-offset: -1px; }
+.option:hover { background: #f3f7fd; }
+.option.selected { border-color: #1768d9; background: #eef4fe; }
+.option input { margin-top: 3px; accent-color: #1768d9; }
+.option-text { display: flex; flex-direction: column; gap: 2px; }
+.option-title { font-size: 14px; font-weight: 600; color: #1d2733; }
+.option-desc { font-size: 13px; color: #637083; }
 
 .error { color: #d34040; font-size: 13px; }
 
