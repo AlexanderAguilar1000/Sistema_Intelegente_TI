@@ -89,13 +89,17 @@
       <p class="info" role="alert">{{ msg }}</p>
     }
 
-    <div class="detail-grid">
+    <app-incident-outcome [incident]="inc" [resolverName]="assignedToName()" />
+
+    <div class="detail-grid" [class.single]="isTech() && isFinal()">
       <div class="left-col">
         <app-incident-summary [incident]="inc" />
       </div>
 
       @if (isTech()) {
-        <app-ai-recommendation-panel [open]="aiOpen()" [loading]="analyzing()" [error]="analysisError()" [analysis]="analysis()" />
+        @if (!isFinal()) {
+          <app-ai-recommendation-panel [open]="aiOpen()" [loading]="analyzing()" [error]="analysisError()" [analysis]="analysis()" />
+        }
       } @else {
         <section class="card">
           <div class="card-header"><h2>Acciones del supervisor</h2></div>

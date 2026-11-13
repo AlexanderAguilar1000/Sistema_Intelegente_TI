@@ -43,6 +43,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.04em; color
 .divider { width: 1px; height: 24px; background: #dfe7f1; margin: 0 2px; }
 
 .detail-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: stretch; }
+.detail-grid.single { grid-template-columns: 1fr; }
 .left-col { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
 .left-col app-incident-summary { align-self: stretch; }
 

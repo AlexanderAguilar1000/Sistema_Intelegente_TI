@@ -11,6 +11,7 @@ import { AssignDialogComponent } from '../../components/assign-dialog/assign-dia
 import { ClassificationDialogComponent } from '../../components/classification-dialog/classification-dialog.component';
 import { CloseDialogComponent } from '../../components/close-dialog/close-dialog.component';
 import { ResolveDialogComponent } from '../../components/resolve-dialog/resolve-dialog.component';
+import { IncidentOutcomeComponent } from '../../components/incident-outcome/incident-outcome.component';
 import { IncidentSummaryComponent } from '../../components/incident-summary/incident-summary.component';
 import { IncidentAnalysis, IncidentDetail, IncidentStatus } from '../../models/incident.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
@@ -19,7 +20,7 @@ import { IncidentService } from '../../services/incident.service';
 @Component({
   selector: 'app-incident-detail-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, ClassificationDialogComponent, AssignDialogComponent, ResolveDialogComponent, CloseDialogComponent, AiRecommendationPanelComponent],
+  imports: [DatePipe, RouterLink, StatusBadgeComponent, IncidentSummaryComponent, IncidentOutcomeComponent, ClassificationDialogComponent, AssignDialogComponent, ResolveDialogComponent, CloseDialogComponent, AiRecommendationPanelComponent],
   templateUrl: './incident-detail-page.component.html',
   styleUrl: './incident-detail-page.component.css'
 })

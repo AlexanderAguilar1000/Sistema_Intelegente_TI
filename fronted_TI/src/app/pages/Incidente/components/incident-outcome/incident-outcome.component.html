@@ -1,0 +1,43 @@
+@if (variant(); as v) {
+  <section class="outcome" [class.resolved]="v === 'resolved'" [class.closed]="v === 'closed'" role="status">
+    <span class="icon" aria-hidden="true">
+      @if (v === 'resolved') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="m15 9-6 6M9 9l6 6" />
+        </svg>
+      }
+    </span>
+
+    <div class="content">
+      @if (v === 'resolved') {
+        <p class="eyebrow">Incidente resuelto</p>
+        <h2>Solución aplicada</h2>
+        <p class="text">{{ incident().solution || 'No se registró el detalle de la solución.' }}</p>
+      } @else {
+        <p class="eyebrow">Incidente cerrado sin solución</p>
+        <h2>{{ reason()?.label ?? 'Motivo no registrado' }}</h2>
+        @if (reason()?.description; as desc) {
+          <p class="text">{{ desc }}</p>
+        }
+      }
+
+      @if (incident().closedAt || resolverName()) {
+        <p class="meta">
+          {{ v === 'resolved' ? 'Resuelto' : 'Cerrado' }}
+          @if (incident().closedAt; as closedAt) {
+            el {{ closedAt | date: 'dd/MM/yyyy HH:mm' }}
+          }
+          @if (resolverName(); as name) {
+            por {{ name }}
+          }
+        </p>
+      }
+    </div>
+  </section>
+}
