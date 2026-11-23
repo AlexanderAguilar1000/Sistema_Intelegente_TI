@@ -1,6 +1,6 @@
-<article class="stat-card">
-  <div class="top">
-    <span [class]="'icon ' + kpi().tone">
+<article [class]="'stat-card ' + kpi().tone">
+  <div class="head">
+    <span class="icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         @switch (kpi().icon) {
           @case ('clipboard-list') {
@@ -27,11 +27,24 @@
         }
       </svg>
     </span>
-    <span class="period">{{ period() }}</span>
+    <div class="info">
+      <p class="label">{{ kpi().label }}</p>
+      <strong class="value">{{ kpi().value }}</strong>
+    </div>
   </div>
-  <p class="label">{{ kpi().label }}</p>
-  <div class="bottom">
-    <strong class="value">{{ kpi().value }}</strong>
-    <span class="helper">{{ kpi().helper }}</span>
+
+  <div class="foot">
+    <div class="meta">
+      <span class="helper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7M8 7h9v9" />
+        </svg>
+        {{ kpi().helper }}
+      </span>
+      <span class="period">{{ period() }}</span>
+    </div>
+    <svg class="spark" viewBox="0 0 110 36" preserveAspectRatio="none" aria-hidden="true">
+      <path [attr.d]="sparkPath()" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+    </svg>
   </div>
 </article>

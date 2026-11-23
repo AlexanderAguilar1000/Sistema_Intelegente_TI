@@ -1,5 +1,5 @@
 # Pendiente Largo plazo 
-- Endpoind para los KPI del incidente . 
+- Endpoind para los KPI del incidente . (Solucionado)
 - Editar técnico 
 - Cambiar el nombre del botón Alta de Técnico 
 - Editar datos del tecnico 
