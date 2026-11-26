@@ -52,8 +52,11 @@ public class IncidentController {
 
     @GetMapping
     public IncidentListResponse listIncidents(
-            @ActiveUser User activeUser, @RequestParam(required = false) Priority priority) {
-        return incidentService.listIncidents(activeUser, priority);
+            @ActiveUser User activeUser,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return incidentService.listIncidents(activeUser, priority, page, size);
     }
 
     @GetMapping("/{id}")

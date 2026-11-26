@@ -154,7 +154,7 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 
 Nace de `specs/pendiente/panel-supervisor.md` y de la revisión de `kpis()`, que hoy se calcula en el navegador (decisiones D16-D19 del plan). Las tareas de backend van primero; las de interfaz dependen de ellas.
 
-- [ ] **T-46 · Paginar el listado de incidentes** — RF-8
+- [x] **T-46 · Paginar el listado de incidentes** — RF-8
   **Hecho cuando:** `GET /api/incidents` acepta `page` y `size` (por defecto 0 y 20, máximo 100), ordena por fecha de creación descendente con orden estable y devuelve `page`, `size`, `totalElements` y `totalPages` además de los campos actuales; una página fuera de rango llega vacía con los totales reales y un `size` inválido devuelve 422; el técnico solo pagina los suyos; los tests de T-11 y T-12 siguen en verde.
 
 - [ ] **T-47 · Aplicar todos los filtros en el servidor** — RF-8

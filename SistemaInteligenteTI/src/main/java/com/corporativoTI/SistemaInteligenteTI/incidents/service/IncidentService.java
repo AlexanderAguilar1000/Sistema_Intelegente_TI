@@ -25,6 +25,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentClosed
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotResolvedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidPageParameterException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClassificationStatus;
 import com.corporativoTI.SistemaInteligenteTI.incidents.model.ClosureReason;
@@ -43,6 +44,9 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +55,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class IncidentService {
+
+    private static final int MAX_PAGE_SIZE = 100;
+
+    /** Orden fijo del listado; el id desempata para que la paginación sea estable (RF-8). */
+    private static final Sort LIST_ORDER = Sort.by(Sort.Direction.DESC, "createdAt", "id");
 
     private final IncidentRepository incidentRepository;
     private final UserRepository userRepository;
@@ -163,32 +172,51 @@ public class IncidentService {
     }
 
     /**
-     * Lista los incidentes visibles: todos para el supervisor, solo los asignados al técnico. Con
-     * {@code priority} filtra por esa prioridad; los pendientes de clasificar quedan fuera (RF-8).
+     * Devuelve una página de los incidentes visibles, del más reciente al más antiguo: todos para el
+     * supervisor, solo los asignados al técnico. Con {@code priority} filtra por esa prioridad antes
+     * de paginar; los pendientes de clasificar quedan fuera. Una página fuera de rango llega vacía
+     * con los totales reales (RF-8).
      */
     @Transactional(readOnly = true)
-    public IncidentListResponse listIncidents(User activeUser, Priority priority) {
-        boolean supervisor = activeUser.getRole() == Role.SUPERVISOR;
-        List<Incident> visible;
-        if (priority == null) {
-            //aca mira al supervisor , si es supervisor y no tiene prioridad le devuelve todos los incidentes del supervisor ,
-            //si es un tecnico y no hay prioridad le devuelve incidentes asignados a un tecnico
-            visible =
-                    supervisor
-                            ? incidentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
-                            : incidentRepository.findByAssignedToOrderByCreatedAtDesc(activeUser);
-        } else { 
-            //aca mira si es supervisor y si tiene prioridad y devuelve la lista de incidentes que tiene el supervisor y filtrado prioridad     
-            //si es tecnico filtra por prioridad y el rol que es tecnico 
-            visible =
-                    supervisor
-                            ? incidentRepository.findByPriorityOrderByCreatedAtDesc(priority)
-                            : incidentRepository.findByAssignedToAndPriorityOrderByCreatedAtDesc(
-                                    activeUser, priority);
+    public IncidentListResponse listIncidents(User activeUser, Priority priority, int page, int size) {
+        if (page < 0) {
+            throw new InvalidPageParameterException("page", page, "No puede ser negativo.");
         }
-        //aqui estoy llamando al static metodo de la clase  le pasa la lista de incidentes  y el map lo que hace es transformar cada objto de esa lista a un objeto to response  . 
-        //to list lo pone en una lista
-        return IncidentListResponse.of(visible.stream().map(IncidentService::toResponse).toList());
+        if (size < 1 || size > MAX_PAGE_SIZE) {
+            throw new InvalidPageParameterException(
+                    "size", size, "Debe estar entre 1 y " + MAX_PAGE_SIZE + ".");
+        }
+        // Un desplazamiento que no cabe en un entero hace fallar la consulta: como está fuera de
+        // rango, se consulta la primera página solo para conocer los totales.
+        boolean unreachable = (long) page * size > Integer.MAX_VALUE;
+        Page<Incident> visible =
+                findVisible(
+                        activeUser,
+                        priority,
+                        PageRequest.of(unreachable ? 0 : page, size, LIST_ORDER));
+        //el map transforma cada incidente de la pagina en un IncidentResponse y to list lo pone en una lista
+        List<IncidentResponse> incidents =
+                unreachable
+                        ? List.of()
+                        : visible.getContent().stream().map(IncidentService::toResponse).toList();
+        return IncidentListResponse.of(
+                incidents, page, size, visible.getTotalElements(), visible.getTotalPages());
+    }
+
+    private Page<Incident> findVisible(User activeUser, Priority priority, Pageable pageable) {
+        boolean supervisor = activeUser.getRole() == Role.SUPERVISOR;
+        if (priority == null) {
+            //aca mira al supervisor , si es supervisor y no tiene prioridad le devuelve todos los incidentes ,
+            //si es un tecnico y no hay prioridad le devuelve incidentes asignados a un tecnico
+            return supervisor
+                    ? incidentRepository.findAll(pageable)
+                    : incidentRepository.findByAssignedTo(activeUser, pageable);
+        }
+        //aca mira si es supervisor y si tiene prioridad y devuelve los incidentes filtrados por prioridad
+        //si es tecnico filtra por prioridad y solo entre sus incidentes
+        return supervisor
+                ? incidentRepository.findByPriority(priority, pageable)
+                : incidentRepository.findByAssignedToAndPriority(activeUser, priority, pageable);
     }
 
     /**

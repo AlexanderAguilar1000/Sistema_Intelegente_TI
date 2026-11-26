@@ -19,11 +19,16 @@ export interface IncidentApiResponse {
   createdAt: string;
 }
 
-/** Cuerpo de GET /api/incidents. */
+/** Cuerpo de GET /api/incidents: una página del listado. Los totales cuentan todas las páginas. */
 export interface IncidentListApiResponse {
   incidents: IncidentApiResponse[];
   empty: boolean;
   message: string | null;
+  /** Empieza en 0. */
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 /** Incidente listo para la vista (etiquetas en español). */

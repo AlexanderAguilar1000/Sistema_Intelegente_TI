@@ -1,7 +1,7 @@
 <section class="card">
   <div class="card-header">
     <div class="card-title">
-      <h2>{{ heading() }} <span class="count">{{ filtered().length }}</span></h2>
+      <h2>{{ heading() }} <span class="count">{{ totalElements() }}</span></h2>
       <p>{{ subheading() }}</p>
     </div>
 
@@ -32,10 +32,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M22 3H2l8 9.46V19l4 2v-8.54z" />
         </svg>
-        <select aria-label="Filtrar por prioridad" [value]="priority()" (change)="onPriority($event)">
-          <option value="all">Todas las prioridades</option>
+        <select aria-label="Filtrar por prioridad" (change)="onPriority($event)">
+          <option value="all" [selected]="priority() === 'all'">Todas las prioridades</option>
           @for (p of priorities; track p) {
-            <option [value]="p">{{ p }}</option>
+            <option [value]="p" [selected]="priority() === p">{{ p }}</option>
           }
         </select>
       </label>
@@ -50,6 +50,12 @@
       </button>
     </div>
   </div>
+
+  @if (pageFiltersActive() && totalPages() > 1) {
+    <p class="page-note" role="status">
+      La búsqueda y el filtro por estado solo revisan esta página: {{ filtered().length }} coincidencias.
+    </p>
+  }
 
   @if (loading()) {
     <div class="empty-state"><p>Cargando incidentes…</p></div>
@@ -123,5 +129,21 @@
       </svg>
       <p>No hay incidentes que coincidan con los filtros.</p>
     </div>
+  }
+
+  @if (!loading() && !error() && totalPages() > 0) {
+    <nav class="pager" aria-label="Paginación">
+      <span>Página {{ page() + 1 }} de {{ totalPages() }}</span>
+      <button type="button" class="icon-btn" aria-label="Página anterior" title="Página anterior" [disabled]="page() === 0" (click)="pageChange.emit(page() - 1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </button>
+      <button type="button" class="icon-btn" aria-label="Página siguiente" title="Página siguiente" [disabled]="page() + 1 >= totalPages()" (click)="pageChange.emit(page() + 1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+    </nav>
   }
 </section>

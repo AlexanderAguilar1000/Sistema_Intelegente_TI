@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, Subscription, map, tap } from 'rxjs';
 import {
   ClassificationValues,
   ClassifyIncidentBody,
@@ -11,38 +11,84 @@ import {
   IncidentDetail,
   IncidentDetailApiResponse,
   IncidentListApiResponse,
+  PriorityFilter,
 } from '../models/incident.model';
 import { AREA_CODE, PRIORITY_CODE, TYPE_CODE, toIncident, toIncidentDetail } from '../utils/incident-api.util';
+
+const PAGE_SIZE = 20;
+/** Tamaño máximo que admite el backend. */
+const MAX_PAGE_SIZE = 100;
 
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
   private http = inject(HttpClient);
 
+  /** Incidentes de la página visible. */
   readonly incidents = signal<Incident[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  /** Página visible (empieza en 0) y totales de todas las páginas, tal como los da el backend. */
+  readonly page = signal(0);
+  readonly totalPages = signal(0);
+  readonly totalElements = signal(0);
+  readonly priorityFilter = signal<PriorityFilter>('all');
+  /** Base de los indicadores, independiente de la página y del filtro de la tabla. */
+  readonly kpiIncidents = signal<Incident[]>([]);
+
+  private listRequest?: Subscription;
+  private kpiRequest?: Subscription;
 
   /** POST /api/incidents: registra el incidente; el backend lo clasifica con IA. */
   createIncident(body: { title: string; description: string }): Observable<Incident> {
     return this.http.post<IncidentApiResponse>('/api/incidents', body).pipe(
       map(toIncident),
-      tap((incident) => this.incidents.update((list) => [incident, ...list])),
+      // El incidente nuevo es el más reciente: se vuelve a pedir la primera página.
+      tap(() => {
+        this.loadIncidents(0, this.priorityFilter());
+        this.loadKpiIncidents();
+      }),
     );
   }
 
-  /** GET /api/incidents: el backend ya devuelve los incidentes ordenados por creación descendente. */
-  loadIncidents(): void {
+  /**
+   * GET /api/incidents?page=&size=&priority=: el backend filtra, ordena por creación descendente y
+   * pagina. Una petición nueva cancela la anterior para que no llegue una página atrasada.
+   */
+  loadIncidents(page = 0, priority: PriorityFilter = 'all'): void {
+    this.listRequest?.unsubscribe();
     this.loading.set(true);
     this.error.set(null);
-    this.http.get<IncidentListApiResponse>('/api/incidents').subscribe({
+    this.page.set(page);
+    this.priorityFilter.set(priority);
+
+    let params = new HttpParams().set('page', page).set('size', PAGE_SIZE);
+    if (priority !== 'all') params = params.set('priority', PRIORITY_CODE[priority]);
+
+    this.listRequest = this.http.get<IncidentListApiResponse>('/api/incidents', { params }).subscribe({
       next: (res) => {
         this.incidents.set(res.incidents.map(toIncident));
+        this.page.set(res.page);
+        this.totalPages.set(res.totalPages);
+        this.totalElements.set(res.totalElements);
         this.loading.set(false);
       },
       error: () => {
         this.error.set('No se pudo cargar la lista de incidentes.');
         this.loading.set(false);
       },
+    });
+  }
+
+  /**
+   * Provisional hasta T-53: los indicadores se calculan en el navegador con los incidentes más
+   * recientes, como mucho {@link MAX_PAGE_SIZE}, porque el backend aún no los publica (T-48).
+   */
+  loadKpiIncidents(): void {
+    this.kpiRequest?.unsubscribe();
+    const params = new HttpParams().set('page', 0).set('size', MAX_PAGE_SIZE);
+    this.kpiRequest = this.http.get<IncidentListApiResponse>('/api/incidents', { params }).subscribe({
+      next: (res) => this.kpiIncidents.set(res.incidents.map(toIncident)),
+      error: () => this.kpiIncidents.set([]),
     });
   }
 

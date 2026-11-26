@@ -35,10 +35,27 @@
       [incidents]="incidents()"
       [loading]="loading()"
       [error]="error()"
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [totalElements]="totalElements()"
+      [priority]="priority()"
+      (pageChange)="changePage($event)"
+      (priorityChange)="changePriority($event)"
       (open)="openIncident($event)"
     />
   } @else {
     <app-incident-create-dialog [open]="createOpen()" (closed)="createOpen.set(false)" />
-    <app-incident-table [incidents]="incidents()" [loading]="loading()" [error]="error()" (open)="openIncident($event)" />
+    <app-incident-table
+      [incidents]="incidents()"
+      [loading]="loading()"
+      [error]="error()"
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [totalElements]="totalElements()"
+      [priority]="priority()"
+      (pageChange)="changePage($event)"
+      (priorityChange)="changePriority($event)"
+      (open)="openIncident($event)"
+    />
   }
 </div>

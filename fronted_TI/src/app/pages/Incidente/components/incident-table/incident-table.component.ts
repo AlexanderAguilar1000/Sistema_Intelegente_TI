@@ -19,21 +19,30 @@ export class IncidentTableComponent {
   heading = input('Todos los incidentes');
   subheading = input('Consulta y gestiona el catálogo global de incidencias.');
   showStatusFilter = input(true);
+  /** Página visible (empieza en 0) y totales que devuelve el backend. */
+  page = input(0);
+  totalPages = input(0);
+  totalElements = input(0);
+  /** El filtro de prioridad lo aplica el backend: la tabla solo lo muestra y pide cambiarlo. */
+  priority = input<PriorityFilter>('all');
   open = output<Incident>();
+  pageChange = output<number>();
+  priorityChange = output<PriorityFilter>();
 
   readonly statuses: IncidentStatus[] = STATUSES;
   readonly priorities: Priority[] = PRIORITIES;
 
   search = signal('');
   status = signal<StatusFilter>('all');
-  priority = signal<PriorityFilter>('all');
 
-  filtered = computed(() => filterIncidents(this.incidents(), this.search(), this.status(), this.priority()));
+  filtered = computed(() => filterIncidents(this.incidents(), this.search(), this.status()));
+  /** Búsqueda o estado activos: solo revisan la página visible (pendiente de T-47). */
+  pageFiltersActive = computed(() => this.search().trim() !== '' || this.status() !== 'all');
 
   clearFilters(): void {
     this.search.set('');
     this.status.set('all');
-    this.priority.set('all');
+    if (this.priority() !== 'all') this.priorityChange.emit('all');
   }
 
   onSearch(event: Event): void {
@@ -45,7 +54,7 @@ export class IncidentTableComponent {
   }
 
   onPriority(event: Event): void {
-    this.priority.set((event.target as HTMLSelectElement).value as PriorityFilter);
+    this.priorityChange.emit((event.target as HTMLSelectElement).value as PriorityFilter);
   }
 
   onRowKey(event: Event, incident: Incident): void {

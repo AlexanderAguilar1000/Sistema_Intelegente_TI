@@ -8,6 +8,7 @@ import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotCla
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotFoundException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.IncidentNotResolvedException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidCatalogValueException;
+import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidPageParameterException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.InvalidTechnicianException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.SolutionTooShortException;
 import com.corporativoTI.SistemaInteligenteTI.incidents.exception.TechnicianAreaMismatchException;
@@ -128,6 +129,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 "INVALID_PARAMETER",
                 "Valor no válido para el parámetro '" + ex.getName() + "': " + ex.getValue());
+    }
+
+    @ExceptionHandler(InvalidPageParameterException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleInvalidPageParameter(InvalidPageParameterException ex) {
+        return new ErrorResponse("INVALID_PARAMETER", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidAreaException.class)

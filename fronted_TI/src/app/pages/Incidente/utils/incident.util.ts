@@ -1,4 +1,4 @@
-import { Incident, IncidentKpi, IncidentStatus, Priority, PriorityFilter, StatusFilter } from '../models/incident.model';
+import { Incident, IncidentKpi, IncidentStatus, Priority, StatusFilter } from '../models/incident.model';
 
 export const PRIORITIES: Priority[] = ['Alta', 'Media', 'Baja'];
 export const STATUSES: IncidentStatus[] = ['Registrado', 'Asignado', 'En progreso', 'Resuelto', 'Cerrado sin solución'];
@@ -53,18 +53,16 @@ export function buildTechnicianKpis(incidents: Incident[], now: Date = new Date(
   ];
 }
 
-/** Busca por título o código (sin distinguir mayúsculas) y filtra por estado y prioridad. */
-export function filterIncidents(
-  incidents: Incident[],
-  search: string,
-  status: StatusFilter,
-  priority: PriorityFilter,
-): Incident[] {
+/**
+ * Busca por título o código (sin distinguir mayúsculas) y filtra por estado dentro de la página
+ * visible. Provisional hasta que el backend aplique ambos filtros (T-47 y T-52); la prioridad ya la
+ * filtra el backend.
+ */
+export function filterIncidents(incidents: Incident[], search: string, status: StatusFilter): Incident[] {
   const term = search.trim().toLowerCase();
   return incidents.filter(
     (i) =>
       (!term || i.title.toLowerCase().includes(term) || i.code.toLowerCase().includes(term)) &&
-      (priority === 'all' || i.priority === priority) &&
       (status === 'all' || i.status === status),
   );
 }
