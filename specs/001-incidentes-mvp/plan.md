@@ -14,27 +14,30 @@ Implementa `spec.md` de esta misma carpeta. Toda decisión aquí se somete a `do
 
 ## 1. Estructura de módulos
 
-### 1.1 Frontend Angular (`frontend/`) — RF-1, RF-2, RF-6…RF-12, RF-14
-Solo presentación: ningún cálculo de estado ni regla de negocio; habilita o deshabilita acciones según lo que devuelve el backend.
+### 1.1 Frontend Angular (`frontend/`) — RF-1, RF-2, RF-6…RF-12, RF-14…RF-16
+Solo presentación: ningún cálculo de estado ni regla de negocio; habilita o deshabilita acciones según lo que devuelve el backend. Tampoco cuenta, filtra ni ordena la lista recibida: indicadores, filtros y orden los resuelve el backend (RF-8, RF-15).
 - `core/` — interceptor que añade el usuario activo a cada petición, manejo de errores, guardas de ruta según el rol del usuario activo (RF-1), servicio de configuración.
 - `user-switcher/` — selector del usuario activo a partir de la lista que devuelve el backend (RF-1).
 - `technicians/` — alta de técnico con selector de área (RF-2).
-- `incidents/list/` — listado con filtro por prioridad y aviso de lista vacía (RF-8).
+- `incidents/list/` — listado paginado con paginador, filtros que se envían al backend como parámetros de consulta (prioridad, estado, pendientes, sin asignar, sin indexar, búsqueda) y aviso de lista vacía (RF-8). Los filtros se reflejan en la URL para que el Panel pueda abrir el listado ya filtrado. Indicadores de volumen recibidos del backend (RF-15).
 - `incidents/detail/` — detalle, acciones de iniciar, analizar, resolver y cerrar sin solución (RF-9, RF-10, RF-11, RF-12, RF-14).
 - `incidents/create/` — formulario de registro con aviso de no escribir contraseñas (RF-3, RNF-4).
 - `incidents/classification/` — corrección manual y reintento de clasificación (RF-4, RF-6).
 - `incidents/assignment/` — asignación y reasignación con lista de técnicos del área (RF-7).
-- `shared/` — catálogos recibidos del backend (RF-5), componentes de estado y prioridad.
+- `dashboard/` — Panel del supervisor, ruta de entrada de ese rol y primera opción de su menú: indicadores de acción con enlace al listado filtrado, lista "Requiere atención", carga por técnico y distribución por prioridad con barras hechas en CSS; estados de carga, vacío y error con reintento (RF-16). La guarda de ruta lo reserva al supervisor (RF-1).
+- `shared/` — catálogos recibidos del backend (RF-5), componentes de estado y prioridad, tarjeta de indicador (`app-stat-card`) reutilizada por Incidentes y Panel.
 
 ### 1.2 Backend Spring Boot (`backend/`) — dueño de las reglas de negocio
 Capas por módulo: `controller` (entrada/salida REST) → `dto` (contratos de petición/respuesta) → `service` (reglas de negocio, casos de uso) → `model` (entidades, enums, máquina de estados) → `repository` (persistencia). No todos los módulos usan las cinco capas: un módulo sin persistencia ni reglas propias (p. ej. `catalog`) solo tiene `model`, `controller` y `dto` (decisión D14).
 - `users` — lista de usuarios para el selector, resolución del usuario activo a partir de la cabecera `X-User-Id`, comprobación de rol antes de cada caso de uso, alta de técnicos con área obligatoria y consulta de técnicos por área (RF-1, RF-2, RF-7). Sin framework de seguridad: es una comprobación de dominio, no autenticación.
 - `catalog` — enums de tipo, prioridad y área en `model`; controlador y DTO de `GET /api/catalogs` en `controller`/`dto`; fuente de verdad de los catálogos (RF-5).
 - `incidents.model` — entidad `Incident`, `IncidentStateMachine` con las transiciones de la sección 4, reglas de pertenencia de área, longitud mínima de solución (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14).
-- `incidents.service` — casos de uso: registrar, reclasificar, corregir, asignar, listar, iniciar, analizar, resolver, cerrar, reindexar (RF-3, RF-4, RF-6…RF-14).
+- `incidents.service` — casos de uso: registrar, reclasificar, corregir, asignar, listar paginado y filtrado, iniciar, analizar, resolver, cerrar, reindexar (RF-3, RF-4, RF-6…RF-14).
+- `incidents.service` (indicadores) — `IncidentKpiService` calcula los indicadores de volumen según el rol del usuario activo (RF-15) y `IncidentSummaryService` el resumen del Panel: conteos de acción, alertas con su motivo y horas de espera, carga por técnico y distribución por prioridad (RF-16). Los conteos se hacen con consultas de agregación en `incidents.repository`, no cargando la tabla en memoria; la hora de referencia sale de un `Clock` inyectado para poder fijarla en los tests.
+- `incidents.model` (umbrales) — `WaitThresholds` con las horas por prioridad, leídas de `application.properties` (`incidents.wait-thresholds.high=4h`, `medium=24h`, `low=72h`) mediante `@ConfigurationProperties` (RF-16).
 - `incidents.controller` — controladores REST (sección 3.1).
 - `incidents.dto` — contratos de petición y respuesta de esos controladores (sección 3.1).
-- `incidents.repository` — persistencia de `Incident` e `IncidentEvent` sobre PostgreSQL.
+- `incidents.repository` — persistencia de `Incident` e `IncidentEvent` sobre PostgreSQL; consultas paginadas con `Pageable` de Spring Data y filtros combinables mediante `Specification` (ambos ya incluidos en Spring Data JPA, sin dependencias nuevas), y consultas de conteo agrupado para RF-15 y RF-16.
 - `ai` — cliente HTTP del servicio Python con sus tiempos límite; traduce fallos a un resultado de dominio, nunca lanza al controlador (RF-4, RF-11, RF-13, RNF-1, RNF-2, RNF-8).
 - `audit` — registro de eventos de cada acción (RNF-6).
 - `shared` — errores de negocio, respuesta de error homogénea, configuración.
@@ -53,6 +56,8 @@ Capas por responsabilidad, análogas a las del backend (decisión D15): `api` �
 
 ### 1.4 Migraciones (`backend/src/main/resources/db/migration`) — RF-2, RF-3, RF-13
 Un único historial Flyway, ejecutado por Spring Boot al arrancar. `V1__initial_schema.sql` crea la extensión `vector` y las cuatro tablas con sus restricciones e índices; los datos de ejemplo y los cambios posteriores van en migraciones siguientes. El servicio Python no crea ni altera esquema (principio 5).
+
+Las enmiendas RF-8 (paginación), RF-15 y RF-16 **no cambian el esquema**: usan columnas que ya existen (`status`, `priority`, `classification_status`, `assigned_to`, `indexed`, `created_at`, `assigned_at`, `closed_at`). Solo se añadiría una migración con un índice sobre `created_at` si el orden del listado se volviera lento con datos reales.
 
 ## 2. Modelo de datos y relaciones
 
@@ -93,7 +98,9 @@ Restricciones que hacen cumplir la spec en la propia base de datos:
 | `GET /api/technicians?area=` | RF-7 |
 | `GET /api/catalogs` | RF-5 |
 | `POST /api/incidents` | RF-3, RF-4 |
-| `GET /api/incidents?priority=&status=&classification=` | RF-8 |
+| `GET /api/incidents?page=&size=&priority=&status=&classification=&unassigned=&unindexed=&q=` (paginado) | RF-8 |
+| `GET /api/incidents/kpis` (indicadores de volumen según el rol) | RF-15 |
+| `GET /api/incidents/summary` (resumen del Panel, solo supervisor) | RF-16 |
 | `GET /api/incidents/{id}` | RF-9 |
 | `POST /api/incidents/{id}/classification/retry` | RF-4 |
 | `PATCH /api/incidents/{id}/classification` | RF-6 |
@@ -106,7 +113,38 @@ Restricciones que hacen cumplir la spec en la propia base de datos:
 
 Toda petición que actúe sobre incidentes lleva la cabecera `X-User-Id` con el usuario activo (RF-1).
 
-Errores homogéneos: `{ "errorCode": "...", "message": "<en español>" }`. 400 si falta o no existe el usuario activo, 403 cuando el rol no permite la acción o el incidente no es del técnico (RF-1, RF-9), 409 para transición inválida o conflicto de versión (RF-7, RF-10, RF-12), 422 para validación (RF-3, RF-12, RF-14).
+Errores homogéneos: `{ "errorCode": "...", "message": "<en español>" }`. 400 si falta o no existe el usuario activo, 403 cuando el rol no permite la acción o el incidente no es del técnico (RF-1, RF-9, RF-16), 409 para transición inválida o conflicto de versión (RF-7, RF-10, RF-12), 422 para validación (RF-3, RF-12, RF-14) y para parámetros de listado inválidos, como `size` fuera de 1…100 o una página negativa (RF-8).
+
+**Listado paginado — RF-8.** `page` empieza en 0 (por defecto 0) y `size` vale 20 por defecto, con máximo 100. El orden es fijo: `created_at` descendente y, en caso de empate, `id` descendente, para que la paginación sea estable. `classification=PENDING` filtra los pendientes, `unassigned=true` los Registrados ya clasificados, `unindexed=true` los Resueltos sin indexar y `q` busca sin distinguir mayúsculas en el título o el código. La respuesta conserva los campos actuales y añade los de paginación:
+```json
+{ "incidents": [ { "id": 42, "code": "INC-0042", "...": "..." } ],
+  "empty": false, "message": null,
+  "page": 0, "size": 20, "totalElements": 57, "totalPages": 3 }
+```
+Una página fuera de rango devuelve `incidents: []`, `empty: true` y los totales reales. No se expone el `Page` de Spring tal cual: el DTO es propio para no atar el contrato al framework.
+
+**Indicadores de volumen — RF-15.** `GET /api/incidents/kpis` responde según el rol del usuario activo:
+```json
+supervisor { "role": "SUPERVISOR",
+             "open": 12, "openLast7Days": 3, "inProgress": 5, "inProgressHighPriority": 2,
+             "resolvedThisMonth": 8, "pendingClassification": 1 }
+técnico    { "role": "TECHNICIAN", "toStart": 2, "inProgress": 3, "resolvedThisMonth": 4 }
+```
+"Resueltos este mes" usa `closed_at` con `status = RESOLVED` y el mes en curso según el reloj del servidor.
+
+**Resumen del Panel — RF-16.** `GET /api/incidents/summary`, 403 para técnicos:
+```json
+{ "generatedAt": "2026-11-24T10:15:00Z",
+  "actionCounts": { "unassigned": 4, "highPriorityOpen": 2, "pendingClassification": 1, "unindexed": 1 },
+  "attention": { "total": 7, "items": [
+      { "id": 42, "code": "INC-0042", "title": "Reporte no carga", "priority": "HIGH",
+        "reason": "UNASSIGNED", "waitingHours": 5 },
+      { "id": 44, "code": "INC-0044", "title": "Impresora", "priority": null,
+        "reason": "PENDING_CLASSIFICATION", "waitingHours": 1 } ] },
+  "technicianLoad": [ { "technicianId": 7, "fullName": "Marta Ruiz", "area": "APPLICATIONS", "activeIncidents": 2 } ],
+  "priorityDistribution": { "HIGH": 2, "MEDIUM": 5, "LOW": 3 } }
+```
+`reason` es `PENDING_CLASSIFICATION`, `UNASSIGNED` o `NOT_STARTED`; `items` tiene como máximo 5 elementos, ya ordenados por el backend, y `total` cuenta todas las alertas. Los textos visibles ("Sin asignar · 5 h") los compone la interfaz a partir de `reason` y `waitingHours`, igual que hoy traduce los enums de estado.
 
 ### 3.2 Contrato Spring Boot → FastAPI
 Spring Boot es siempre el cliente; **FastAPI nunca llama al backend**, así que no hay dependencia circular ni devolución asíncrona de la clasificación. Todas las respuestas de error usan `{"error_code": "...", "detail": "..."}`.
@@ -184,6 +222,10 @@ Toda transición pasa por `IncidentStateMachine`; los controladores no deciden (
 | D13 | El servicio Python **no llama nunca** al backend (sección 3.2) | Evita dependencia circular y deja un solo sentido de comunicación, más fácil de simular en tests | Devolución asíncrona de la clasificación desde Python hacia Spring Boot, como se planteó en la idea inicial: obliga a exponer un endpoint de retorno y a gestionar reintentos |
 | D14 | Paquetes del backend Spring Boot organizados por módulo con capas **`controller` / `dto` / `service` / `model` / `repository`** (sección 1.2), en vez de las capas `web` (controlador+DTO) y `domain` (entidades+enums) que fijaba la versión anterior de este plan | Decisión explícita del usuario tras revisar la implementación de T-03: separa controlador y DTO en paquetes propios y nombra en inglés la capa de entidades (`model`) y la de persistencia (`repository`), siguiendo la convención habitual de Spring Boot | Capas `web`/`domain` de la versión anterior de este plan: agrupaban controlador y DTO en un mismo paquete y usaban `domain` para entidades y máquina de estados; se descartan por decisión explícita del usuario, no por un defecto técnico |
 | D15 | Servicio Python organizado en capas **`api` / `schemas` / `services` / `repositories` / `clients` / `core` / `db`** (sección 1.3), en vez de `api` / `domain` / `infrastructure` | Decisión explícita del usuario: es la estructura más reconocible en FastAPI y paralela a la del backend (D14), de modo que ambos servicios se explican con el mismo vocabulario | `domain`/`infrastructure` (estilo hexagonal): exigía mover los puertos al dominio para ser coherente y era más difícil de justificar para este tamaño de servicio |
+| D16 | **Indicadores y resumen del Panel calculados en el backend** con consultas de agregación (RF-15, RF-16), que sustituyen a `buildKpis` y `buildTechnicianKpis` del frontend | Hoy los KPI se cuentan en el navegador sobre la lista recibida: es lógica de negocio en la interfaz (principio 3), "Resueltos este mes" sale mal porque el listado no trae la fecha de resolución, depende del reloj del navegador y dejaría de cuadrar en cuanto el listado se pagine | Mantener el cálculo en Angular: más rápido de escribir, pero incorrecto con paginación y contrario a AGENTS.md |
+| D17 | **Paginación por desplazamiento** (`page`/`size`) con `Pageable` y filtros combinables con `Specification`, ambos de Spring Data JPA, y todos los filtros aplicados en el servidor (RF-8) | Ya está en el stack (principio 1), es lo que entiende el paginador de la interfaz y con el volumen del MVP no hay problemas de rendimiento. Filtrar en el servidor es obligatorio: filtrar en el navegador solo buscaría dentro de la página visible | Paginación por cursor: más robusta ante altas concurrentes, pero innecesaria para este volumen. Mantener el filtro por estado y la búsqueda en el navegador: daría resultados incompletos |
+| D18 | Barras del Panel hechas **solo con CSS**, sin librería de gráficos (RF-16) | AGENTS.md exige confirmar cualquier dependencia nueva; dos distribuciones simples no la justifican | Chart.js, ngx-charts u otra librería: dependencia nueva para dos gráficos de barras |
+| D19 | **Umbrales de espera en configuración** (`@ConfigurationProperties`) y reloj inyectado (`Clock`) (RF-16) | Se ajustan sin recompilar y los tests fijan la hora para comprobar "N horas" de forma determinista | Constantes en el código: cambiar un umbral exigiría desplegar. Columna o tabla de SLA: cambio de esquema para tres números |
 
 ## 6. Estrategia de test
 
@@ -193,6 +235,8 @@ Toda transición pasa por `IncidentStateMachine`; los controladores no deciden (
 3. Web con MockMvc, sobre el usuario activo de la cabecera: petición sin `X-User-Id` ⇒ 400 (RF-1); matriz de rol y endpoint (RF-1); técnico que abre un incidente ajeno ⇒ 403 (RF-9); supervisor que intenta analizar ⇒ 403 (RF-11); asignación a técnico de otra área ⇒ 409 con motivo (RF-7).
 4. Persistencia contra PostgreSQL real: migraciones aplicadas, restricciones que rechazan estados imposibles (RF-4, RF-7, RF-12, RF-14), filtros del listado por rol y prioridad y exclusión de pendientes (RF-8), conflicto de versión en asignación concurrente (casos límite).
 5. Contrato del cliente de IA contra un servidor HTTP simulado: 200, 422, 503 y plazo agotado para los tres endpoints de la sección 3.2.
+6. Listado paginado contra PostgreSQL real (RF-8): tamaño por defecto y máximo, orden estable, totales correctos, página fuera de rango vacía, `size` inválido ⇒ 422, cada filtro y su combinación, y el técnico que pagina solo sus incidentes.
+7. Indicadores y Panel con `Clock` fijo (RF-15, RF-16): cada conteo con incidentes sembrados, "Resueltos este mes" por fecha de resolución (incluido el creado el mes anterior), indicadores del técnico limitados a los suyos, umbrales por prioridad (justo por debajo y por encima), orden y límite de 5 de "Requiere atención" con su total, técnico con carga 0, pendientes fuera de la distribución por prioridad y técnico que pide el resumen ⇒ 403.
 
 **Servicio de IA — `pytest`**
 1. Validación de catálogo y parseo de la respuesta de Groq, con cliente de Groq simulado (RF-4).
@@ -202,7 +246,7 @@ Toda transición pasa por `IncidentStateMachine`; los controladores no deciden (
 5. API con el cliente de pruebas de FastAPI: forma exacta de las respuestas y de los errores de los tres endpoints; `/embeddings` aplicado dos veces deja una sola fila (RF-13).
 
 **Frontend Angular — pruebas unitarias del propio framework**
-Guardas de ruta por rol (RF-1), filtro de prioridad (RF-8) y visibilidad de acciones según estado y rol, incluida la ausencia de "Analizar con IA" para el supervisor (RF-9, RF-11).
+Guardas de ruta por rol (RF-1), filtro de prioridad (RF-8) y visibilidad de acciones según estado y rol, incluida la ausencia de "Analizar con IA" para el supervisor (RF-9, RF-11). Además: el paginador y los filtros generan los parámetros de consulta correctos y leen los de la URL (RF-8); los indicadores pintan lo recibido sin recalcular (RF-15); el Panel muestra sus estados de carga, vacío ("Todo al día") y error, y cada indicador de acción navega al listado con su filtro (RF-16); la guarda impide al técnico entrar al Panel (RF-1, RF-16).
 
 **Manual, en la demostración (criterios de la sección 8 de la spec)**
 Flujo completo de punta a punta y los tres caminos de error de la IA. Además, un guion aparte, ejecutado a mano y nunca en la suite, que llama a Groq de verdad para comprobar que sigue respondiendo en el formato esperado (RNF-9).
@@ -219,16 +263,18 @@ Regla de cierre: ninguna tarea se da por terminada con `./mvnw test` o `pytest` 
 | RF-5 Catálogos | `catalog`, `shared/` | `GET /api/catalogs` | Backend 1; IA 1 |
 | RF-6 Corrección manual | `incidents.model`, `incidents/classification/` | `PATCH .../classification` | Backend 1, 4 |
 | RF-7 Asignación y reasignación | `incidents.model`, `users`, `incidents/assignment/` | `PUT .../assignment`, `GET /api/technicians?area=` | Backend 1, 3, 4 |
-| RF-8 Listado y filtrado | `incidents.service`, `incidents/list/` | `GET /api/incidents` | Backend 4; Angular |
+| RF-8 Listado, filtrado y paginación | `incidents.service`, `incidents.repository`, `incidents/list/` | `GET /api/incidents?page=&size=&…` | Backend 4, 6; Angular |
 | RF-9 Detalle | `incidents.controller`, `incidents/detail/` | `GET /api/incidents/{id}` | Backend 3; Angular |
 | RF-10 Inicio del trabajo | `incidents.model` | `POST .../start` | Backend 1 |
 | RF-11 Analizar con IA | `ai`, `services/retrieval_service.py`, `services/recommendation_service.py` | `/ai/v1/analyses` | Backend 2, 3, 5; IA 2, 4, 5 |
 | RF-12 Resolución | `incidents.model` | `POST .../resolution` | Backend 1, 4 |
 | RF-13 Histórico e indexación | `ai`, `repositories/embedding_repository.py` | `/ai/v1/embeddings`, `POST .../index/retry` | Backend 2, 5; IA 4, 5 |
 | RF-14 Cierre sin solución | `incidents.model` | `POST .../closure` | Backend 1, 4 |
+| RF-15 Indicadores de volumen | `IncidentKpiService`, `incidents.repository`, `incidents/list/` | `GET /api/incidents/kpis` | Backend 7; Angular |
+| RF-16 Panel del supervisor | `IncidentSummaryService`, `WaitThresholds`, `users`, `dashboard/` | `GET /api/incidents/summary` | Backend 3, 7; Angular |
 
 ## 8. Orden de implementación sugerido
-1. Migraciones y modelo de datos (RF-2, RF-3, RF-13) · 2. Usuarios, selector de usuario activo y reglas de rol (RF-1) · 3. Alta de técnicos y catálogos (RF-2, RF-5) · 4. Registro con IA simulada y máquina de estados (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14) · 5. Servicio Python de clasificación (RF-4) · 6. Indexación y recuperación (RF-13, RF-11) · 7. Frontend Angular (RF-8, RF-9 y el resto de pantallas) · 8. Demostración de punta a punta.
+1. Migraciones y modelo de datos (RF-2, RF-3, RF-13) · 2. Usuarios, selector de usuario activo y reglas de rol (RF-1) · 3. Alta de técnicos y catálogos (RF-2, RF-5) · 4. Registro con IA simulada y máquina de estados (RF-3, RF-6, RF-7, RF-10, RF-12, RF-14) · 5. Servicio Python de clasificación (RF-4) · 6. Indexación y recuperación (RF-13, RF-11) · 7. Frontend Angular (RF-8, RF-9 y el resto de pantallas) · 8. Enmiendas: paginación y filtros en el servidor (RF-8), indicadores en el backend (RF-15) y Panel del supervisor (RF-16), primero el backend y después la interfaz · 9. Demostración de punta a punta.
 
 ## 9. Riesgos y pendientes
 - **Deuda consciente:** sin autenticación, cualquiera que llegue a la API puede actuar como otro usuario cambiando la cabecera `X-User-Id`. Es aceptable para un MVP local de demostración, pero añadir autenticación real es el primer paso antes de exponer el sistema a usuarios reales.
@@ -237,5 +283,9 @@ Regla de cierre: ninguna tarea se da por terminada con `./mvnw test` o `pytest` 
 - La dimensión 384 queda atada a `paraphrase-multilingual-MiniLM-L12-v2`: cambiar de modelo obliga a una migración y a reindexar todo el histórico (principio 5).
 - El modelo se descarga la primera vez que arranca el servicio (unos 470 MB) y esa primera ejecución tarda notablemente más. Conviene fijar la versión del modelo y de sentence-transformers para que todos usen el mismo y los vectores sean comparables.
 - Con el histórico vacío, las primeras demostraciones darán siempre recomendación general; conviene resolver varios incidentes antes de enseñar el RAG.
-- Las diez dudas menores de la sección 9 de la spec siguen abiertas y no bloquean este plan.
+- Las dudas menores de la sección 9 de la spec siguen abiertas, salvo el orden y la paginación del listado, ya resueltos, y no bloquean este plan.
+- **Cambio de contrato del listado:** al paginar, `GET /api/incidents` deja de devolver todos los incidentes. El frontend debe actualizarse a la vez (T-52); entre tanto solo vería la primera página. Las pruebas existentes del listado (T-11, T-12) deben seguir pasando con la página por defecto.
+- **Código que desaparece del frontend:** `buildKpis`, `buildTechnicianKpis` y `filterIncidents` de `incident.util.ts` se sustituyen por los datos del backend (D16, D17).
+- Los umbrales de espera de RF-16 (4 h, 24 h, 72 h) son una propuesta inicial; se ajustan por configuración tras ver datos reales.
+- Paginación por desplazamiento: si se crean incidentes mientras alguien recorre las páginas, uno puede repetirse o saltarse entre páginas. Aceptado para el MVP (caso límite de la spec).
 - AGENTS.md ya recoge Angular, el modelo local de embeddings y la ausencia de autenticación, así que el stack de este plan es el aprobado (principio 1).

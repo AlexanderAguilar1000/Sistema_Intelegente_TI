@@ -22,6 +22,8 @@ El MVP **no autentica a nadie**: no hay contraseñas ni sesiones. El usuario act
 - **HU-8** Como técnico, quiero pulsar "Analizar con IA" para recibir pasos de solución basados en incidentes similares ya resueltos.
 - **HU-9** Como técnico, quiero registrar la solución y resolver el incidente para cerrarlo y que sirva a futuros casos.
 - **HU-10** Como técnico, quiero cerrar sin solución los incidentes duplicados o no reproducibles para que no ensucien el conocimiento histórico.
+- **HU-11** Como supervisor o técnico, quiero ver indicadores de mi trabajo calculados por el sistema para saber cuánto hay abierto, en curso y resuelto.
+- **HU-12** Como supervisor, quiero un panel de entrada que me diga qué requiere mi atención ahora (sin asignar, sin iniciar, sin clasificar, sin indexar) y cómo está repartida la carga entre técnicos, para actuar primero sobre lo urgente y asignar con criterio.
 
 ## 4. Requisitos funcionales
 
@@ -82,6 +84,9 @@ El MVP **no autentica a nadie**: no hay contraseñas ni sesiones. El usuario act
 - Donde un incidente esté pendiente de clasificación, el sistema deberá mostrarlo sin tipo, prioridad ni área, y excluirlo de los filtros por prioridad.
 - El sistema deberá permitir al supervisor localizar los incidentes pendientes de clasificación, ya que son los únicos que no puede asignar.
 - Si no hay incidentes que mostrar, entonces el sistema deberá indicar que la lista está vacía.
+- *(Enmienda — paginación)* El sistema deberá devolver el listado **paginado**: 20 incidentes por página por defecto, como máximo 100, ordenados del más reciente al más antiguo por fecha de creación. Con cada página deberá indicar el número de página, su tamaño, el total de incidentes que cumplen los filtros y el total de páginas.
+- Si se pide una página fuera de rango, entonces el sistema deberá devolver una página vacía con los totales reales; si el tamaño pedido no es válido (menor que 1 o mayor que 100), deberá rechazar la petición indicando el motivo.
+- *(Enmienda — filtros en el servidor)* Todos los filtros deberán aplicarse en el sistema antes de paginar, nunca sobre la página ya recibida: prioridad, estado, pendientes de clasificación, **sin asignar** (Registrado y ya clasificado), **sin indexar** (Resuelto y no indexado) y búsqueda por texto en el título o el código. Los filtros se combinan entre sí y siempre dentro de los incidentes que el usuario puede ver.
 
 ### RF-9 Detalle del incidente
 - Cuando el técnico abra un incidente asignado a él, el sistema deberá mostrar título, descripción, clasificación, estado, fechas, la última recomendación mostrada mientras la pantalla siga abierta si la hubo, y la solución o el motivo de cierre si existen.
@@ -121,6 +126,35 @@ El MVP **no autentica a nadie**: no hay contraseñas ni sesiones. El usuario act
 - El sistema no deberá exigir texto de solución en este cierre.
 - Mientras un incidente esté Cerrado sin solución, el sistema deberá impedir modificarlo, reasignarlo o reabrirlo.
 
+### RF-15 Indicadores de volumen calculados por el sistema *(enmienda)*
+- El sistema deberá calcular los indicadores a partir de **todos** los incidentes que el usuario puede ver, no de la página del listado que tenga en pantalla, y con la fecha y hora del servidor.
+- Cuando el supervisor abra la pantalla de Incidentes, el sistema deberá mostrar:
+  - **Abiertos**: incidentes que no están Resueltos ni Cerrados sin solución, y cuántos de ellos se crearon en los últimos 7 días.
+  - **En progreso**: incidentes En progreso, y cuántos de ellos son de prioridad Alta.
+  - **Resueltos este mes**: incidentes cuya **fecha de resolución** cae en el mes en curso, aunque se crearan antes.
+  - **Pendientes de clasificación**: incidentes marcados como pendientes.
+- Cuando el técnico abra "Mis asignados", el sistema deberá mostrar sus propios indicadores: **por iniciar** (Asignados a él), **en progreso** y **resueltos este mes** por fecha de resolución.
+- La interfaz deberá limitarse a mostrar los valores recibidos, sin recalcularlos.
+
+### RF-16 Panel del supervisor *(enmienda)*
+- Cuando el supervisor entre en la aplicación, el sistema deberá mostrarle el **Panel** como pantalla de entrada; la pantalla de Incidentes sigue siendo la de trabajo (tabla, filtros y alta).
+- Si un técnico intenta acceder al Panel o a sus datos, entonces el sistema deberá denegarlo.
+- El Panel deberá mostrar cuatro **indicadores de acción**, cada uno con acceso al listado de Incidentes con el filtro correspondiente ya aplicado (RF-8):
+  - **Sin asignar**: Registrados y ya clasificados.
+  - **Alta prioridad**: abiertos de prioridad Alta.
+  - **Pendientes de clasificación**.
+  - **Sin indexar**: Resueltos que quedaron fuera del histórico (RF-13).
+- El Panel deberá mostrar la lista **Requiere atención**, con un máximo de 5 incidentes, cada uno con su prioridad, código, título y motivo. Los motivos son:
+  - **Sin clasificar**: pendiente de clasificación, desde que se registró.
+  - **Sin asignar · N h**: Registrado y clasificado que supera el umbral de espera de su prioridad contado desde su creación.
+  - **Sin iniciar · N h**: Asignado que supera el umbral de espera de su prioridad contado desde su asignación.
+- **Umbrales de espera** por prioridad: Alta 4 horas, Media 24 horas, Baja 72 horas. Son umbrales internos de alerta del panel, no compromisos de servicio con nadie, y deberán poder cambiarse por configuración sin tocar el código.
+- La lista deberá ordenarse por prioridad (Alta, Media, Baja y por último los pendientes de clasificación, que aún no tienen prioridad) y, a igual prioridad, por mayor tiempo de espera. Deberá indicar cuántas alertas hay en total aunque solo muestre 5.
+- Si no hay ninguna alerta, entonces el Panel deberá indicar "Todo al día".
+- El Panel deberá mostrar la **carga por técnico**: para cada técnico, su área y el número de incidentes Asignados o En progreso que tiene, incluidos los que tienen cero.
+- El Panel deberá mostrar la **distribución por prioridad** de los incidentes abiertos ya clasificados.
+- Todos los valores del Panel deberán venir calculados por el sistema (RF-15); la interfaz solo los presenta.
+
 ## 5. Requisitos no funcionales
 - **RNF-1 Tiempo de clasificación:** el registro de un incidente no deberá esperar la clasificación más de **10 segundos**; superado ese tiempo, el incidente queda pendiente de clasificación (RF-3).
 - **RNF-2 Tiempo de análisis:** la recomendación deberá mostrarse en un máximo de **30 segundos**; superado ese tiempo se trata como fallo (RF-11).
@@ -147,6 +181,12 @@ El MVP **no autentica a nadie**: no hay contraseñas ni sesiones. El usuario act
 - El técnico pulsa "Analizar con IA" varias veces seguidas → solo se procesa un análisis a la vez.
 - Se intenta resolver un incidente Asignado sin haberlo iniciado → se rechaza (debe pasar por En progreso).
 - Un incidente resuelto queda sin indexar por un fallo de la IA → no se recupera como caso similar hasta que el supervisor relance la indexación.
+- Se crea un incidente mientras el usuario recorre las páginas del listado → los incidentes pueden desplazarse una posición entre páginas; se acepta en el MVP.
+- Se pide la página 50 de un listado con 3 páginas → página vacía con los totales reales, no un error.
+- Un incidente creado el mes pasado y resuelto este mes → cuenta en "Resueltos este mes".
+- Un técnico sin incidentes activos → aparece en la carga por técnico con 0.
+- Un incidente pendiente de clasificación no tiene prioridad → en "Requiere atención" va detrás de los clasificados y no cuenta en la distribución por prioridad.
+- Se reasigna un incidente → el tiempo "sin iniciar" se cuenta desde la nueva asignación.
 
 ## 7. Fuera de alcance (MVP)
 - Diseño del modelo de datos (se definirá en una fase posterior).
@@ -158,22 +198,25 @@ El MVP **no autentica a nadie**: no hay contraseñas ni sesiones. El usuario act
 - Creación de incidentes por usuarios finales o por técnicos.
 - Edición o eliminación del título y la descripción de un incidente una vez registrado.
 - Guardar las recomendaciones de la IA para consultarlas después de la sesión.
-- Notificaciones (correo, avisos en tiempo real), SLA y tiempos de respuesta comprometidos.
+- Notificaciones (correo, avisos en tiempo real), SLA y tiempos de respuesta comprometidos. Los umbrales de espera de RF-16 solo alimentan las alertas del Panel.
+- Actualización automática del Panel en tiempo real: se refresca al abrirlo o al pedirlo.
 - Procesos automáticos en segundo plano: los reintentos de clasificación y de indexación los lanza una persona.
 - Detección automática de incidentes duplicados.
 - Adjuntos, comentarios o historial de conversación dentro del incidente.
-- Informes, métricas o paneles.
+- Informes, métricas o paneles distintos de los indicadores de RF-15 y del Panel del supervisor de RF-16 (por ejemplo, históricos, exportaciones o distribución por área).
+- Panel propio del técnico: sus indicadores viven en "Mis asignados" (RF-15).
 
 ## 8. Criterios de finalización
-- Todos los criterios de aceptación de RF-1 a RF-14 se cumplen y tienen pruebas automatizadas que pasan, con la IA simulada según RNF-9 (principio 4 de la constitución).
+- Todos los criterios de aceptación de RF-1 a RF-16 se cumplen y tienen pruebas automatizadas que pasan, con la IA simulada según RNF-9 (principio 4 de la constitución).
 - Se demuestra el flujo completo: se selecciona un supervisor → crea un técnico de un área → registra un incidente → queda clasificado → lo asigna a un técnico de esa área → se cambia al usuario técnico, que ve solo sus incidentes y filtra por prioridad → abre el detalle → lo inicia → pulsa "Analizar con IA" → registra la solución → un nuevo incidente parecido recupera ese caso como referencia.
 - Se demuestran los caminos de error de la IA: clasificación fuera de plazo o inválida (pendiente + reintento + clasificación manual), análisis fallido o inválido (mensaje + reintento) e indexación fallida (resuelto sin indexar + reindexación).
 - Se demuestra que un incidente no puede asignarse a un técnico de otra área ni sin clasificar.
 - Se demuestra que un técnico no puede ver ni actuar sobre incidentes de otro técnico.
+- Se demuestra que el supervisor entra al Panel, ve las alertas y la carga por técnico, y que pulsar un indicador de acción abre el listado ya filtrado y paginado.
 - No quedan dudas abiertas que bloqueen ningún requisito: las pendientes de la sección 9 son de detalle y no condicionan el diseño.
 
 ## 9. Dudas abiertas (menores, no bloqueantes)
-- [NECESITA ACLARACIÓN] Orden por defecto y paginación del listado, y filtros adicionales por estado, tipo o área.
+- ~~Orden por defecto y paginación del listado, y filtros adicionales por estado~~ → resuelto por la enmienda de RF-8. Siguen abiertos los filtros por tipo o área.
 - [NECESITA ACLARACIÓN] Qué fechas se muestran en el detalle (creación, asignación, inicio, cierre).
 - [NECESITA ACLARACIÓN] Si el técnico sigue viendo en su listado los incidentes que ya cerró.
 - [NECESITA ACLARACIÓN] Si las marcas "clasificado por IA" y "corregida manualmente" son visibles para el usuario o solo internas.

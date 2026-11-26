@@ -1,6 +1,6 @@
 # Pendiente — Panel del supervisor (boceto de diseño)
 
-Estado: **propuesta, sin implementar**. Antes de programarlo hace falta una enmienda a `spec.md` con su RF y las tareas correspondientes en `task.md` (principio 2 de la constitución).
+Estado: **incorporado a la spec 001** como RF-16 (Panel), RF-15 (indicadores en el backend) y la enmienda de paginación de RF-8, con las tareas T-46…T-55 de `task.md`. Este boceto queda como referencia visual; ante cualquier diferencia manda `spec.md`.
 
 ## Objetivo
 Dar al supervisor una pantalla de **monitoreo** que le diga qué requiere su atención ahora. La pantalla actual de Incidentes (`incidente.component.html`) se mantiene como pantalla de **trabajo**: tabla, filtros y botón "Nuevo incidente".

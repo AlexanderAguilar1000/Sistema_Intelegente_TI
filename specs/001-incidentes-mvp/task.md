@@ -150,10 +150,44 @@ Desglose ejecutable de `spec.md` y `plan.md`. Cada tarea es una porción de func
 - [X] **T-43 · Pedir la recomendación de la IA en pantalla** — RF-11
   **Hecho cuando:** al pulsar "Analizar con IA" se ve el aviso de procesando, luego los pasos numerados y los casos usados como referencia; si no hay casos aparece el aviso de recomendación general, y si la IA falla aparece el error con opción de reintentar.
 
-## Bloque 6 — Cierre
+## Bloque 6 — Enmienda: paginación, indicadores en el backend y Panel del supervisor
 
-- [ ] **T-44 · Demostrar el flujo completo** — RF-1…RF-14
-  **Hecho cuando:** se recorre de punta a punta el flujo de la sección 8 de la spec (selector de supervisor → alta de técnico → registro → clasificación → asignación → técnico → filtro → detalle → iniciar → analizar → resolver → un incidente parecido recupera ese caso) y también los tres caminos de error de la IA.
+Nace de `specs/pendiente/panel-supervisor.md` y de la revisión de `kpis()`, que hoy se calcula en el navegador (decisiones D16-D19 del plan). Las tareas de backend van primero; las de interfaz dependen de ellas.
+
+- [ ] **T-46 · Paginar el listado de incidentes** — RF-8
+  **Hecho cuando:** `GET /api/incidents` acepta `page` y `size` (por defecto 0 y 20, máximo 100), ordena por fecha de creación descendente con orden estable y devuelve `page`, `size`, `totalElements` y `totalPages` además de los campos actuales; una página fuera de rango llega vacía con los totales reales y un `size` inválido devuelve 422; el técnico solo pagina los suyos; los tests de T-11 y T-12 siguen en verde.
+
+- [ ] **T-47 · Aplicar todos los filtros en el servidor** — RF-8
+  **Hecho cuando:** el listado filtra en el backend por `status`, `classification=PENDING`, `unassigned=true`, `unindexed=true` y `q` (título o código, sin distinguir mayúsculas), combinables entre sí y con `priority`, siempre antes de paginar y dentro de lo que el usuario puede ver; tests de cada filtro y de una combinación.
+
+- [ ] **T-48 · Calcular los indicadores de volumen en el backend** — RF-15
+  **Hecho cuando:** `GET /api/incidents/kpis` devuelve al supervisor abiertos (y creados en 7 días), en progreso (y de prioridad alta), resueltos este mes por fecha de resolución y pendientes de clasificación, y al técnico por iniciar, en progreso y resueltos este mes solo de los suyos; con `Clock` fijo, un incidente creado el mes anterior y resuelto este mes cuenta; tests.
+
+- [ ] **T-49 · Resumen del Panel: indicadores de acción y distribución** — RF-16
+  **Hecho cuando:** `GET /api/incidents/summary` devuelve los conteos sin asignar, alta prioridad abiertos, pendientes de clasificación y sin indexar, y la distribución por prioridad de los abiertos clasificados (sin los pendientes); un técnico recibe 403 con mensaje en español; tests.
+
+- [ ] **T-50 · Lista "Requiere atención" con umbrales de espera** — RF-16
+  **Hecho cuando:** el resumen incluye como mucho 5 alertas con motivo (sin clasificar, sin asignar, sin iniciar) y horas de espera, ordenadas por prioridad y después por espera, y el total de alertas; los umbrales (4 h, 24 h, 72 h) se leen de `application.properties`; con `Clock` fijo un incidente justo por debajo del umbral no aparece y uno por encima sí; tras una reasignación la espera cuenta desde la nueva asignación; tests.
+
+- [ ] **T-51 · Carga por técnico** — RF-16
+  **Hecho cuando:** el resumen incluye a todos los técnicos con su área y su número de incidentes Asignados o En progreso, incluidos los que tienen 0, y no cuenta los cerrados; tests.
+
+- [ ] **T-52 · Listado paginado y filtrado desde la interfaz** — RF-8
+  **Hecho cuando:** la tabla muestra un paginador con página actual y total, cada cambio de página, filtro o búsqueda pide al backend la página correspondiente, los filtros se leen y escriben en la URL, y `filterIncidents` deja de filtrar en el navegador; una lista sin resultados sigue mostrando el aviso; `npm test` en verde.
+
+- [ ] **T-53 · Indicadores de Incidentes y Mis asignados desde el backend** — RF-15
+  **Hecho cuando:** las tarjetas de ambas pantallas pintan los valores de `GET /api/incidents/kpis`, se eliminan `buildKpis` y `buildTechnicianKpis`, y los valores no cambian al pasar de página; `npm test` en verde.
+
+- [ ] **T-54 · Pantalla del Panel del supervisor** — RF-16
+  **Hecho cuando:** el Panel muestra las cuatro tarjetas de acción (reutilizando `app-stat-card`), cada una abre el listado de Incidentes con su filtro; la lista "Requiere atención" abre el detalle al pulsar una fila; la carga por técnico y la distribución por prioridad se dibujan con barras en CSS sin librerías; hay estados de carga, vacío ("Todo al día") y error con reintento; en móvil pasa a una columna y tarjetas 2×2.
+
+- [ ] **T-55 · El Panel como entrada del supervisor** — RF-1, RF-16
+  **Hecho cuando:** "Panel" es la primera opción del menú del supervisor y su página de entrada, al elegir un técnico en el selector se le lleva a "Mis asignados", y la guarda de ruta impide al técnico abrir el Panel; test de la guarda.
+
+## Bloque 7 — Cierre
+
+- [ ] **T-44 · Demostrar el flujo completo** — RF-1…RF-16
+  **Hecho cuando:** se recorre de punta a punta el flujo de la sección 8 de la spec (selector de supervisor → Panel → alta de técnico → registro → clasificación → asignación → técnico → filtro y paginación → detalle → iniciar → analizar → resolver → un incidente parecido recupera ese caso), se comprueba que un indicador del Panel abre el listado filtrado, y también los tres caminos de error de la IA.
 
 - [ ] **T-45 · Comprobar a mano que Groq responde como se espera** — RNF-9
   **Hecho cuando:** existe un guion, fuera de la suite automática, que llama a Groq de verdad para clasificación y análisis, y se ha ejecutado al menos una vez confirmando que el formato de respuesta sigue siendo válido.
