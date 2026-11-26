@@ -51,19 +51,24 @@
     </div>
   </div>
 
-  @if (pageFiltersActive() && totalPages() > 1) {
-    <p class="page-note" role="status">
-      La búsqueda y el filtro por estado solo revisan esta página: {{ filtered().length }} coincidencias.
-    </p>
-  }
-
+  <!-- Área de altura fija: la tarjeta mide lo mismo haya los incidentes que haya. -->
+  <div class="table-area">
   @if (loading()) {
     <div class="empty-state"><p>Cargando incidentes…</p></div>
   } @else if (error()) {
     <div class="empty-state"><p>{{ error() }}</p></div>
   } @else if (filtered().length) {
-    <div class="table-wrap">
       <table>
+        <colgroup>
+          <col class="col-incident" />
+          <col class="col-status" />
+          <col class="col-type" />
+          <col class="col-priority" />
+          <col class="col-area" />
+          <col class="col-technician" />
+          <col class="col-date" />
+          <col class="col-chevron" />
+        </colgroup>
         <thead>
           <tr>
             <th>Incidente</th>
@@ -108,8 +113,8 @@
                 }
               </td>
               <td><app-priority-badge [priority]="incident.priority" /></td>
-              <td>{{ incident.area ?? 'Sin asignar' }}</td>
-              <td>{{ incident.assignedToName ?? '—' }}</td>
+              <td [title]="incident.area ?? ''">{{ incident.area ?? 'Sin asignar' }}</td>
+              <td [title]="incident.assignedToName ?? ''">{{ incident.assignedToName ?? '—' }}</td>
               <td class="muted">{{ incident.createdAt | date: 'dd/MM/yyyy' }}</td>
               <td class="chevron-col">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -120,7 +125,6 @@
           }
         </tbody>
       </table>
-    </div>
   } @else {
     <div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -130,20 +134,33 @@
       <p>No hay incidentes que coincidan con los filtros.</p>
     </div>
   }
+  </div>
 
-  @if (!loading() && !error() && totalPages() > 0) {
-    <nav class="pager" aria-label="Paginación">
-      <span>Página {{ page() + 1 }} de {{ totalPages() }}</span>
-      <button type="button" class="icon-btn" aria-label="Página anterior" title="Página anterior" [disabled]="page() === 0" (click)="pageChange.emit(page() - 1)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-      </button>
-      <button type="button" class="icon-btn" aria-label="Página siguiente" title="Página siguiente" [disabled]="page() + 1 >= totalPages()" (click)="pageChange.emit(page() + 1)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m9 18 6-6-6-6" />
-        </svg>
-      </button>
-    </nav>
-  }
+  <footer class="table-footer">
+    @if (!loading() && !error()) {
+      @if (pageFiltersActive() && totalPages() > 1) {
+        <span class="page-note" role="status">
+          La búsqueda y el filtro por estado solo revisan esta página: {{ filtered().length }} coincidencias.
+        </span>
+      } @else {
+        <span>Mostrando {{ filtered().length }} de {{ totalElements() }} {{ totalElements() === 1 ? 'incidente' : 'incidentes' }}</span>
+      }
+
+      @if (totalPages() > 0) {
+        <nav class="pager" aria-label="Paginación">
+          <span>Página {{ page() + 1 }} de {{ totalPages() }}</span>
+          <button type="button" class="icon-btn" aria-label="Página anterior" title="Página anterior" [disabled]="page() === 0" (click)="pageChange.emit(page() - 1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <button type="button" class="icon-btn" aria-label="Página siguiente" title="Página siguiente" [disabled]="page() + 1 >= totalPages()" (click)="pageChange.emit(page() + 1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </nav>
+      }
+    }
+  </footer>
 </section>

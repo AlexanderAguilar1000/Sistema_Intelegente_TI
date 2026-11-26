@@ -82,6 +82,32 @@ describe('IncidentTableComponent (paginación)', () => {
     expect(element.querySelectorAll('tbody tr').length).toBe(1);
   });
 
+  it('mantiene la misma altura con 0, 1, 3 o 20 incidentes, cargando o con error', () => {
+    const some = (count: number): Incident[] =>
+      Array.from({ length: count }, (_, i) => ({ ...incident, id: i + 1 }));
+    const height = (): number => element.querySelector('.card')!.getBoundingClientRect().height;
+
+    const heights = [0, 1, 3, 20].map((count) => {
+      render(some(count), 0, count ? 1 : 0, count);
+      return height();
+    });
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+    heights.push(height());
+    fixture.componentRef.setInput('loading', false);
+    fixture.componentRef.setInput('error', 'No se pudo cargar la lista de incidentes.');
+    fixture.detectChanges();
+    heights.push(height());
+
+    expect(heights).toEqual(heights.map(() => heights[0]));
+  });
+
+  it('indica en el pie cuántos incidentes se muestran del total', () => {
+    render([incident], 0, 3, 41);
+
+    expect(element.querySelector('.table-footer')?.textContent).toContain('Mostrando 1 de 41 incidentes');
+  });
+
   it('avisa de que la búsqueda solo revisa la página actual', () => {
     render([incident], 0, 3, 41);
     const search = element.querySelector<HTMLInputElement>('.search input')!;
